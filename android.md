@@ -87,7 +87,15 @@ public class ActivityJnject extends AppCompatActivity {
 
 ### [2.api与implementation的区别](https://www.jianshu.com/p/8962d6ba936e)
 
-![img](https://upload-images.jianshu.io/upload_images/6988326-58819360d6526e55.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
+| 新配置                | 已弃用配置 | 行为                                                         |
+| :-------------------- | :--------- | :----------------------------------------------------------- |
+| `implementation`      | `compile`  | Gradle 会将依赖项添加到编译类路径，并将依赖项打包到构建输出。不过，当您的模块配置 `implementation` 依赖项时，会让 Gradle 了解您不希望该模块在编译时将该依赖项泄露给其他模块。也就是说，其他模块只有在运行时才能使用该依赖项。使用此依赖项配置代替 `api` 或 `compile`（已弃用）可以**显著缩短构建时间**，因为这样可以减少构建系统需要重新编译的模块数。例如，如果 `implementation` 依赖项更改了其 API，Gradle 只会重新编译该依赖项以及直接依赖于它的模块。大多数应用和测试模块都应使用此配置。 |
+| `api`                 | `compile`  | Gradle 会将依赖项添加到编译类路径和构建输出。当一个模块包含 `api` 依赖项时，会让 Gradle 了解该模块要以传递方式将该依赖项导出到其他模块，以便这些模块在运行时和编译时都可以使用该依赖项。此配置的行为类似于 `compile`（现已弃用），但使用它时应格外小心，只能对您需要以传递方式导出到其他上游消费者的依赖项使用它。这是因为，如果 `api` 依赖项更改了其外部 API，Gradle 会在编译时重新编译所有有权访问该依赖项的模块。因此，拥有大量的 `api` 依赖项会显著增加构建时间。除非要将依赖项的 API 公开给单独的模块，否则库模块应改用 `implementation` 依赖项。 |
+| `compileOnly`         | `provided` | Gradle 只会将依赖项添加到编译类路径（也就是说，不会将其添加到构建输出）。如果您创建 Android 模块时在编译期间需要相应依赖项，但它在运行时可有可无，此配置会很有用。如果您使用此配置，那么您的库模块必须包含一个运行时条件，用于检查是否提供了相应依赖项，然后适当地改变该模块的行为，以使该模块在未提供相应依赖项的情况下仍可正常运行。这样做不会添加不重要的瞬时依赖项，因而有助于减小最终 APK 的大小。此配置的行为类似于 `provided`（现已弃用）。**注意**：您不能将 `compileOnly` 配置与 AAR 依赖项配合使用。 |
+| `runtimeOnly`         | `apk`      | Gradle 只会将依赖项添加到构建输出，以便在运行时使用。也就是说，不会将其添加到编译类路径。此配置的行为类似于 `apk`（现已弃用）。 |
+| `annotationProcessor` | `compile`  | 如需添加对作为注释处理器的库的依赖关系，您必须使用 `annotationProcessor` 配置将其添加到注释处理器类路径。这是因为，使用此配置可以将编译类路径与注释处理器类路径分开，从而提高构建性能。如果 Gradle 在编译类路径上找到注释处理器，则会禁用[避免编译](https://docs.gradle.org/current/userguide/java_plugin.html#sec:java_compile_avoidance)功能，这样会对构建时间产生负面影响（Gradle 5.0 及更高版本会忽略在编译类路径上找到的注释处理器）。如果 JAR 文件包含以下文件，则 Android Gradle 插件会假定依赖项是注释处理器： `META-INF/services/javax.annotation.processing.Processor`。如果插件检测到编译类路径上包含注释处理器，则会生成构建错误。 |
+| `lintChecks`          |            | 使用此配置可以添加您希望 Gradle 在构建项目时执行的 lint 检查。**注意**：使用 Android Gradle 插件 3.4.0 及更高版本时，此依赖项配置不再将 lint 检查打包在 Android 库项目中。如需将 lint 检查依赖项包含在 AAR 库中，请使用下面介绍的 `lintPublish` 配置。 |
+| `lintPublish`         |            | 在 Android 库项目中使用此配置可以添加您希望 Gradle 编译成 `lint.jar` 文件并打包在 AAR 中的 lint 检查。这会使得使用 AAR 的项目也应用这些 lint 检查。如果您之前使用 `lintChecks` 依赖项配置将 lint 检查包含在已发布的 AAR 中，则需要迁移这些依赖项以改用 `lintPublish` 配置。`dependencies {  // Executes lint checks from the ':checks' project  // at build time.  lintChecks project(':checks')  // Compiles lint checks from the ':checks-to-publish'  // into a lint.jar file and publishes it to your  // Android library.  lintPublish project(':checks-to-publish') }` |
 
 ![img](https://i.loli.net/2019/04/19/5cb8a51ddc485.png)
 
