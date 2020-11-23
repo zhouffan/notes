@@ -18,3 +18,12 @@
 **Merge into  Current**： 合并到当前分支（将所选分支合并到当前分支）
 
 **储藏工作区**：项目右键 --> Git --> Repository --> Stash Changes
+
+
+
+### 2.[Git 之 merge 与 rebase 的区别](https://www.cnblogs.com/zhangzhang-y/p/13682281.html)
+
+实际操作体会
+
+
+
