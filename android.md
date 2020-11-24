@@ -258,13 +258,26 @@ makeJar.dependsOn(build)
 
 
 
+### 6. [Gradle之apt, annotationProcessor和kapt](https://blog.csdn.net/l460133921/article/details/104908122)
 
+APT(Annotation Processing Tool)，即 **注解处理工具**
 
+annotationProcessor：注解处理器，是Gradle中 **内置的APT工具**
 
+```
+dependencies {
+  annotationProcessor "com.alibaba:arouter-compiler:1.2.2"
+}
+```
 
+kapt：Kotlin中不使用annotationProcessor，而是使用kapt
 
-
-
+```
+apply plugin: 'kotlin-kapt'
+dependencies {
+  kapt "com.alibaba:arouter-compiler:1.2.2"
+}
+```
 
 
 
