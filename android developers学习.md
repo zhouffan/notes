@@ -264,13 +264,82 @@ android {
 
 #### 1.4 LiveData
 
+[`LiveData`](https://developer.android.com/reference/androidx/lifecycle/LiveData) 是一种可观察的数据存储器类。具有生命周期感知能力。
+
+如果观察者（由 [`Observer`](https://developer.android.com/reference/androidx/lifecycle/Observer) 类表示）的生命周期处于 [`STARTED`](https://developer.android.com/reference/androidx/lifecycle/Lifecycle.State#STARTED) 或 [`RESUMED`](https://developer.android.com/reference/androidx/lifecycle/Lifecycle.State#RESUMED) 状态，则使活跃状态。LiveData只通知活跃状态的观察者。
+
+可以放心地观察 [`LiveData`](https://developer.android.com/reference/androidx/lifecycle/LiveData) 对象而不必担心泄露（当 Activity 和 Fragment 的生命周期被销毁时，系统会立即退订它们）。
+
+有以下优势：
+
+- **确保界面符合数据状态** ：LiveData 遵循观察者模式。当生命周期状态发生变化时，LiveData 会通知 [`Observer`](https://developer.android.com/reference/androidx/lifecycle/Observer) 对象。您可以整合代码以在这些 `Observer` 对象中更新界面。观察者可以在每次发生更改时更新界面，而不是在每次应用数据发生更改时更新界面。
+- **不会发生内存泄漏**： 观察者会绑定到 [`Lifecycle`](https://developer.android.com/reference/androidx/lifecycle/Lifecycle) 对象，并在其关联的生命周期遭到销毁后进行自我清理。
+- **不会因 Activity 停止而导致崩溃**：如果观察者的生命周期处于非活跃状态（如返回栈中的 Activity），则它不会接收任何 LiveData 事件。
+- **不再需要手动处理生命周期**：界面组件只是观察相关数据，不会停止或恢复观察。LiveData 将自动管理所有这些操作，因为它在观察时可以感知相关的生命周期状态变化。
+- **数据始终保持最新状态**：如果生命周期变为非活跃状态，它会在**再次**变为活跃状态时接收最新的数据。例如，曾经在后台的 Activity 会在返回前台后立即接收最新的数据。
+- **适当的配置更改**：如果由于配置更改（如设备旋转）而重新创建了 Activity 或 Fragment，它会立即接收最新的可用数据。
+- **共享资源**：您可以使用单一实例模式扩展 [`LiveData`](https://developer.android.com/reference/androidx/lifecycle/LiveData) 对象以封装系统服务，以便在应用中共享它们。`LiveData` 对象连接到系统服务一次，然后需要相应资源的任何观察者只需观察 `LiveData` 对象。
+
+LiveData 是一种可用于任何数据的封装容器，其中包括可实现 `Collections` 的对象，如 `List`。[`LiveData`](https://developer.android.com/reference/androidx/lifecycle/LiveData) 对象通常存储在 [`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) 对象中，并可通过 getter 方法进行访问
+
+**注意**：请确保用于更新界面的 `LiveData` 对象存储在 `ViewModel` 对象中，而不是将其存储在 Activity 或 Fragment 中，原因如下：
+
+- 避免 Activity 和 Fragment 过于庞大。现在，这些界面控制器负责显示数据，但不负责存储数据状态。
+
+- 将 `LiveData` 实例与特定的 Activity 或 Fragment 实例分离开，并使 `LiveData` 对象在配置更改后继续存在。
 
 
-#### 1.5 Navigation
 
 
 
-#### 1.6 Paging
+ 
+
+#### 1.5 ViewModel 
+
+[`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) 类旨在以注重生命周期的方式存储和管理界面相关的数据。[`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) 类让数据可在发生屏幕旋转等配置更改后继续留存。
+
+Activity 和 Fragment 之类的界面控制器主要用于显示界面数据、对用户操作做出响应或处理操作系统通信（如权限请求）。如果要求界面控制器也负责从数据库或网络加载数据，那么会使类越发膨胀。
+
+从界面控制器逻辑中分离出视图数据所有权的做法更易行且更高效。
+
+架构组件为界面控制器提供了 [`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) 辅助程序类，该类负责为界面准备数据。在配置更改期间会自动保留 [`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) 对象，以便它们存储的数据立即可供下一个 Activity 或 Fragment 实例使用。例如，如果您需要在应用中显示用户列表，请确保将获取和保留该用户列表的责任分配给 [`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel)，而不是 Activity 或 Fragment。
+
+```java
+ public class MyViewModel extends ViewModel {
+        private MutableLiveData<List<User>> users;
+        public LiveData<List<User>> getUsers() {
+            if (users == null) {
+                users = new MutableLiveData<List<User>>();
+                loadUsers();
+            }
+            return users;
+        } 
+        private void loadUsers() {
+            // Do an asynchronous operation to fetch users.
+        }
+    }
+```
+
+```java
+public class MyActivity extends AppCompatActivity {
+        public void onCreate(Bundle savedInstanceState) {
+            // Create a ViewModel the first time the system calls an activity's onCreate() method.
+            // Re-created activities receive the same MyViewModel instance created by the first activity.
+
+            MyViewModel model = new ViewModelProvider(this).get(MyViewModel.class);
+            model.getUsers().observe(this, users -> {
+                // update UI
+            });
+        }
+    }
+    
+```
+
+​	
+
+#### 1.6 Navigation
+
+
 
 
 
@@ -278,7 +347,7 @@ android {
 
 
 
-#### 1.8 ViewModel
+#### 1.8 Paging
 
 
 
