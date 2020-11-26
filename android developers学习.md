@@ -711,3 +711,109 @@ public void onConfigurationChanged(Configuration newConfig) {
     </selector>
 ```
 
+字符串处理：
+
+支持以下 HTML 元素：
+
+- 粗体：<b>、<em>
+
+- 斜体：<i>、<cite>、<dfn>
+
+- 文本放大 25%：<big>
+
+- 文本缩小 20%：<small>
+
+- 设置字体属性：<font face=”font_family“ color=”hex_color”>。可能的字体系列示例包括 `monospace`、`serif` 和 `sans_serif`。
+
+- 设置等宽字体系列：<tt>
+
+- 删除线：<s>、<strike>、<del>
+
+- 下划线：<u>
+
+- 上标：<sup>
+
+- 下标：<sub>
+
+- 列表标记：<ul>、<li>
+
+- 换行符：<br>
+
+- 区隔标记：<div>
+
+- CSS 样式：<span style=”color|background_color|text-decoration”>
+
+- 段落：<p dir=”rtl | ltr” style=”…”>
+
+  
+
+```xml
+<string name="welcome_messages">Hello, %1$s! You have %2$d new messages.</string>
+
+String text = getString(R.string.welcome_messages, username, mailCount);
+
+```
+
+[activity](https://developer.android.com/guide/topics/manifest/activity-element)：
+
+```xml
+<activity android:allowEmbedded=["true" | "false"]
+          android:allowTaskReparenting=["true" | "false"]
+          android:alwaysRetainTaskState=["true" | "false"]
+          android:autoRemoveFromRecents=["true" | "false"]
+          android:banner="drawable resource"
+          android:clearTaskOnLaunch=["true" | "false"]
+          android:colorMode=[ "hdr" | "wideColorGamut"]
+          android:configChanges=["mcc", "mnc", "locale",
+                                 "touchscreen", "keyboard", "keyboardHidden",
+                                 "navigation", "screenLayout", "fontScale",
+                                 "uiMode", "orientation", "density",
+                                 "screenSize", "smallestScreenSize"]
+          android:directBootAware=["true" | "false"]
+          android:documentLaunchMode=["intoExisting" | "always" |
+                                  "none" | "never"]
+          android:enabled=["true" | "false"]
+          android:excludeFromRecents=["true" | "false"]
+          android:exported=["true" | "false"]
+          android:finishOnTaskLaunch=["true" | "false"]
+          android:hardwareAccelerated=["true" | "false"]
+          android:icon="drawable resource"
+          android:immersive=["true" | "false"]
+          android:label="string resource"
+          android:launchMode=["standard" | "singleTop" |
+                              "singleTask" | "singleInstance"]
+          android:lockTaskMode=["normal" | "never" |
+                              "if_whitelisted" | "always"]
+          android:maxRecents="integer"
+          android:maxAspectRatio="float"
+          android:multiprocess=["true" | "false"]
+          android:name="string"
+          android:noHistory=["true" | "false"]  
+          android:parentActivityName="string" 
+          android:persistableMode=["persistRootOnly" | 
+                                   "persistAcrossReboots" | "persistNever"]
+          android:permission="string"
+          android:process="string"
+          android:relinquishTaskIdentity=["true" | "false"]
+          android:resizeableActivity=["true" | "false"]
+          android:screenOrientation=["unspecified" | "behind" |
+                                     "landscape" | "portrait" |
+                                     "reverseLandscape" | "reversePortrait" |
+                                     "sensorLandscape" | "sensorPortrait" |
+                                     "userLandscape" | "userPortrait" |
+                                     "sensor" | "fullSensor" | "nosensor" |
+                                     "user" | "fullUser" | "locked"]
+          android:showForAllUsers=["true" | "false"]
+          android:stateNotNeeded=["true" | "false"]
+          android:supportsPictureInPicture=["true" | "false"]
+          android:taskAffinity="string"
+          android:theme="resource or theme"
+          android:uiOptions=["none" | "splitActionBarWhenNarrow"]
+          android:windowSoftInputMode=["stateUnspecified",
+                                       "stateUnchanged", "stateHidden",
+                                       "stateAlwaysHidden", "stateVisible",
+                                       "stateAlwaysVisible", "adjustUnspecified",
+                                       "adjustResize", "adjustPan"] >   
+    . . .
+</activity>
+```
