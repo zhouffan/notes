@@ -567,7 +567,7 @@ public void onConfigurationChanged(Configuration newConfig) {
 
 #### [2.3 动画](https://developer.android.com/guide/topics/resources/animation-resource)
 
-[属性动画](https://developer.android.com/guide/topics/resources/animation-resource#Property)
+##### [属性动画](https://developer.android.com/guide/topics/resources/animation-resource#Property)
 
 通过使用 `Animator` 在设定的时间段内修改对象的属性值来创建动画。
 
@@ -605,7 +605,7 @@ public void onConfigurationChanged(Configuration newConfig) {
 
 
 
-[视图动画](https://developer.android.com/guide/topics/resources/animation-resource#View)
+##### [视图动画](https://developer.android.com/guide/topics/resources/animation-resource#View)
 
 视图动画框架可支持补间动画和逐帧动画，两者都可以在 XML 中声明.
 
@@ -754,7 +754,7 @@ String text = getString(R.string.welcome_messages, username, mailCount);
 
 ```
 
-[activity](https://developer.android.com/guide/topics/manifest/activity-element)：
+#### 2.4 [activity](https://developer.android.com/guide/topics/manifest/activity-element)：
 
 ```xml
 <activity android:allowEmbedded=["true" | "false"]
@@ -817,3 +817,424 @@ String text = getString(R.string.welcome_messages, username, mailCount);
     . . .
 </activity>
 ```
+
+#### 2.5 支持不同的像素密度
+
+![img](https://developer.android.com/images/screens_support/densities-phone_2x.png)
+
+   **图 1.** 尺寸相同的两个屏幕可能具有不同数量的像素
+
+要在密度不同的屏幕上保留界面的可见尺寸，您必须使用**密度无关像素 (dp) **作为度量单位来设计界面。dp 是一个虚拟像素单位，1 dp 约等于中密度屏幕（160dpi；“基准”密度）上的 1 像素。对于其他每个密度，Android 会将此值转换为相应的实际像素数。
+
+例如，考虑图 1 中的两部设备。如果将某个视图定义为“100px”宽，那么它在左侧设备上看起来要大得多。因此，您必须改用“100dp”来确保它在两个屏幕上看起来大小相同。
+
+
+
+- 将 dp 单位转换为像素单位
+
+在某些情况下，您需要以 `dp` 表示尺寸，然后将其转换为像素。dp 单位转换为屏幕像素很简单：
+
+```
+px = dp * (dpi / 160)
+```
+
+假设在某一应用中，用户的手指至少移动 16 像素之后，系统才会识别出滚动或滑动手势。在基线屏幕上，用户必须移动 `16 pixels / 160 dpi`（等于一英寸的 1/10 或 2.5 毫米），系统才会识别该手势。而在配备高密度显示屏 (240dpi) 的设备上，用户的手指必须至少移动 `16 pixels / 240 dpi`，相当于 1 英寸的 1/15（1.7 毫米）。此距离短得多，因此用户会感觉应用在该设备上更灵敏。
+
+要解决此问题，必须在代码中以 `dp` 表示手势阈值，然后再转换为实际像素。例如：
+
+```java
+// The gesture threshold expressed in dp
+    private static final float GESTURE_THRESHOLD_DP = 16.0f;
+
+    // Get the screen's density scale
+    final float scale = getResources().getDisplayMetrics().density;
+    // Convert the dps to pixels, based on density scale
+    mGestureThreshold = (int) (GESTURE_THRESHOLD_DP * scale + 0.5f);
+
+    // Use mGestureThreshold as a distance in pixels...
+    
+```
+
+`DisplayMetrics.density` 字段根据当前像素密度指定将 `dp` 单位转换为像素时所必须使用的缩放系数。在中密度屏幕上，`DisplayMetrics.density` 等于 1.0；在高密度屏幕上，它等于 1.5；在超高密度屏幕上，等于 2.0；在低密度屏幕上，等于 0.75。此数字是一个系数，用其乘以 `dp` 单位，即可得出当前屏幕的实际像素数。
+
+![img](https://developer.android.com/images/screens_support/devices-density_2x.png)
+
+| 密度限定符 | 说明                                                         |
+| :--------- | :----------------------------------------------------------- |
+| `ldpi`     | 适用于低密度 (ldpi) 屏幕 (~ 120dpi) 的资源。                 |
+| `mdpi`     | 适用于中密度 (mdpi) 屏幕 (~ 160dpi) 的资源（这是基准密度）。 |
+| `hdpi`     | 适用于高密度 (hdpi) 屏幕 (~ 240dpi) 的资源。                 |
+| `xhdpi`    | 适用于加高 (xhdpi) 密度屏幕 (~ 320dpi) 的资源。              |
+| `xxhdpi`   | 适用于超超高密度 (xxhdpi) 屏幕 (~ 480dpi) 的资源。           |
+| `xxxhdpi`  | 适用于超超超高密度 (xxxhdpi) 屏幕 (~ 640dpi) 的资源。        |
+| `nodpi`    | 适用于所有密度的资源。这些是与密度无关的资源。无论当前屏幕的密度是多少，系统都不会缩放以此限定符标记的资源。 |
+| `tvdpi`    | 适用于密度介于 mdpi 和 hdpi 之间的屏幕（约 213dpi）的资源。这不属于“主要”密度组。它主要用于电视，而大多数应用都不需要它。对于大多数应用而言，提供 mdpi 和 hdpi 资源便已足够，系统将视情况对其进行缩放。如果您发现有必要提供 tvdpi 资源，应按一个系数来确定其大小，即 1.33*mdpi。例如，如果某张图片在 mdpi 屏幕上的大小为 100px x 100px，那么它在 tvdpi 屏幕上的大小应该为 133px x 133px。 |
+
+
+
+### 3、Android TV
+
+```xml
+   <manifest>
+        <uses-feature android:name="android.hardware.touchscreen"
+                  android:required="false" />
+        ...
+    </manifest>
+    
+```
+
+**注意**：您必须在应用清单中声明触摸屏并非必要条件（如本示例代码中所示），否则您的应用将不会出现在 TV 设备上的 Google Play 中。
+
+使用 Android 的标准字号：
+
+```xml
+    <TextView
+          android:id="@+id/atext"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:gravity="center_vertical"
+          android:singleLine="true"
+          android:textAppearance="?android:attr/textAppearanceMedium"/>
+```
+
+### 4、Activity
+
+例如，假设您的应用想要使用一个名为 SocialApp 的应用在社交媒体上分享文章，则 SocialApp 本身必须定义调用它的应用所需具备的权限：
+
+```xml
+<manifest>
+    <activity android:name="...."
+       android:permission=”com.google.socialapp.permission.SHARE_POST”
+
+    />
+```
+
+然后，为了能够调用 SocialApp，您的应用必须匹配 SocialApp 清单中设置的权限：
+
+```xml
+    <manifest>
+       <uses-permission android:name="com.google.socialapp.permission.SHARE_POST" />
+    </manifest>
+```
+
+
+
+#### 4.1 Activity 生命周期
+
+- onCreate()
+
+`setContentView()`
+
+`onCreate()` 完成后，下一个回调将是 `onStart()`。
+
+- onStart()
+
+ Activity 进入“已开始”状态时， 对用户可见，**会非常快速**地完成，接着进入“已恢复”状态，系统将调用 `onResume()`。
+
+例如，应用通过此方法来**初始化**维护界面的代码。
+
+- onResume()
+
+进入“已恢复”状态时来到前台，应用与用户互动的状态，应用会一直保持这种状态，**直到**某些事件发生，让**焦点远离应用**。此类事件包括接到来电、用户导航到另一个 Activity，或设备屏幕关闭。
+
+从onPause()回来，初始化在 [`onPause()`](https://developer.android.com/reference/android/app/Activity#onPause()) 期间释放的组件。
+
+例如启动相机预览。
+
+`onResume()` 回调后面总是跟着 `onPause()` 回调。
+
+```java
+public class CameraComponent implements LifecycleObserver { 
+    ... 
+    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
+    public void initializeCamera() {
+        if (camera == null) {
+            getCamera();
+        }
+    } 
+}
+```
+
+- onPause()
+
+当 Activity 失去焦点并进入“已暂停”状态时，离开。 
+
+`onPause()` 执行完毕后，下一个回调为 `onStop()`或 `onResume()`，具体取决于 Activity 进入“已暂停”状态后发生的情况。
+
+​	例如：
+​		如 onResume() 部分所述，某个事件会中断应用执行。这是最常见的情况。
+​		在 Android 7.0（API 级别 24）或更高版本中，有多个应用在多窗口模式下运行。无论何时，都只有一个应用（窗口）可以拥有焦点，因此系统会暂停所有其他应用。
+​		有新的半透明 Activity（例如对话框）处于开启状态。只要 Activity 仍然部分可见但并未处于焦点之中，它便会一直暂停。
+
+使用 [`onPause()`](https://developer.android.com/reference/android/app/Activity#onPause()) 方法释放系统资源、传感器（例如 GPS）手柄
+
+```java
+public class JavaCameraComponent implements LifecycleObserver { 
+    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+    public void releaseCamera() {
+        if (camera != null) {
+            camera.release();
+            camera = null;
+        }
+    } 
+}
+```
+
+- onStop()
+
+进入“已停止”状态。对用户可见。
+
+在 `onStop()` 方法中
+
+1、应用应释放或调整在应用对用户不可见时的无用资源。例如，应用可以暂停动画效果，或从精确位置更新切换到粗略位置更新。使用 `onStop()` 而非 `onPause()` 可确保与界面相关的工作继续进行。
+
+2、执行 CPU 相对密集的关闭操作。例如，如果您无法找到更合适的时机来将信息保存到数据库。 
+
+系统调用的下一个回调将是 `onRestart()`（如果 Activity 重新与用户互动）或者 `onDestroy()`（如果 Activity 彻底终止）。
+
+例如：当新启动的 Activity 覆盖整个屏幕时，可能会发生这种情况。
+
+将草稿笔记内容保存到持久性存储空间中。
+
+```java
+@Override
+protected void onStop() {
+    // call the superclass method first
+    super.onStop(); 
+    // save the note's current draft, because the activity is stopping
+    // and we want to be sure the current note progress isn't lost.
+    ContentValues values = new ContentValues();
+    values.put(NotePad.Notes.COLUMN_NAME_NOTE, getCurrentNoteText());
+    values.put(NotePad.Notes.COLUMN_NAME_TITLE, getCurrentNoteTitle());
+
+    // do this update in background on an AsyncQueryHandler or equivalent
+    asyncQueryHandler.startUpdate (
+            mToken,  // int token to correlate calls
+            null,    // cookie, not used here
+            uri,    // The URI for the note to update.
+            values,  // The map of column names and new values to apply to them.
+            null,    // No SELECT criteria are used.
+            null     // No WHERE columns are used.
+    );
+}
+```
+
+- onRestart()
+
+当处于“已停止”状态的 Activity 即将重启时，系统就会调用此回调。`onRestart()` 会从 Activity 停止时的状态恢复 Activity。
+
+此回调后面总是跟着 `onStart()`。
+
+- onDestroy()
+
+系统会在销毁 Activity 之前调用此回调。
+
+1. Activity 即将结束（由于用户彻底关闭 Activity 或由于系统为 Activity 调用 [`finish()`](https://developer.android.com/reference/android/app/Activity#finish())）
+2. 由于配置变更（例如设备旋转或多窗口模式），系统暂时销毁 Activity
+
+此回调是 Activity 接收的最后一个回调。通常，实现 `onDestroy()` 是为了确保在销毁 Activity 或包含该 Activity 的进程时释放该 Activity 的所有资源。
+
+可以使用 [`isFinishing()`](https://developer.android.com/reference/android/app/Activity#isFinishing()) 方法区分这两种情况。
+
+
+
+- 状态变化
+
+可以单独使用 onSaveInstanceState() 使界面状态在**配置更改**和**系统启动的进程被终止**时保持不变。[`Bundle`](https://developer.android.com/reference/android/os/Bundle) 对象并不适合保留大量数据，因为它需要在主线程上进行序列化处理并占用系统进程内存。如需保存大量数据，您应组合使用持久性本地存储、[`onSaveInstanceState()`](https://developer.android.com/reference/android/app/Activity#onSaveInstanceState(android.os.Bundle)) 方法和 [`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) 类来保存数据。
+
+**注意**：当用户显式关闭 Activity 时，或者在其他情况下调用 `finish()` 时，系统不会调用 [`onSaveInstanceState()`](https://developer.android.com/reference/android/app/Activity#onSaveInstanceState(android.os.Bundle))。
+
+```java
+static final String STATE_SCORE = "playerScore";
+static final String STATE_LEVEL = "playerLevel"; 
+@Override
+public void onSaveInstanceState(Bundle savedInstanceState) {
+    // Save the user's current game state
+    savedInstanceState.putInt(STATE_SCORE, currentScore);
+    savedInstanceState.putInt(STATE_LEVEL, currentLevel); 
+    // Always call the superclass so it can save the view hierarchy state
+    super.onSaveInstanceState(savedInstanceState);
+}
+```
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState); // Always call the superclass first
+
+    // Check whether we're recreating a previously destroyed instance
+    if (savedInstanceState != null) {
+        // Restore value of members from saved state
+        currentScore = savedInstanceState.getInt(STATE_SCORE);
+        currentLevel = savedInstanceState.getInt(STATE_LEVEL);
+    } else {
+        // Probably initialize members with default values for a new instance
+    }
+    // ...
+}
+```
+
+或者
+
+```java
+public void onRestoreInstanceState(Bundle savedInstanceState) {
+    // Always call the superclass so it can restore the view hierarchy
+    super.onRestoreInstanceState(savedInstanceState);
+
+    // Restore state members from saved instance
+    currentScore = savedInstanceState.getInt(STATE_SCORE);
+    currentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+```
+
+#### 4.2 状态变更
+
+有很多事件会触发配置更改。最显著的例子或许是**横屏和竖屏之间**的屏幕方向变化。其他情况，如语言或输入设备的改变等，也可能导致配置更改。
+
+当配置发生更改时，Activity 会被销毁并重新创建。原始 Activity 实例将触发 [`onPause()`](https://developer.android.com/reference/android/app/Activity#onpause)、[`onStop()`](https://developer.android.com/reference/android/app/Activity#onstop) 和 [`onDestroy()`](https://developer.android.com/reference/android/app/Activity#ondestroy) 回调。系统将创建新的 Activity 实例，并触发 [`onCreate()`](https://developer.android.com/reference/android/app/Activity#onCreate(android.os.Bundle))、[`onStart()`](https://developer.android.com/reference/android/app/Activity#onstart) 和 [`onResume()`](https://developer.android.com/reference/android/app/Activity#onResume()) 回调。
+
+如果有新的 Activity 或对话框出现在前台，夺取了焦点且完全覆盖了正在进行的 Activity，则被覆盖的 Activity 会失去焦点并进入“已停止”状态。然后，系统会快速地接连调用 `onPause()` 和 `onStop()`。
+
+当被覆盖的 Activity 的同一实例返回到前台时，系统会对该 Activity 调用 `onRestart()`、`onStart()` 和 `onResume()`。如果被覆盖的 Activity 的新实例进入后台，则系统不会调用 onRestart()，而只会调用 `onStart()` 和 `onResume()`。
+
+#### 4.3 [Fragment](https://developer.android.com/guide/components/fragments)
+
+`inflate()` 方法带有三个参数：
+
+- 您想要扩展的布局的资源 ID。
+
+- 将作为扩展布局父项的 `ViewGroup`。传递 `container` 对系统向扩展布局的根视图（由其所属的父视图指定）应用布局参数具有重要意义。
+
+- 指示是否应在扩展期间将扩展布局附加至 `ViewGroup`（第二个参数）的布尔值。（在本例中，此值为 false，因为系统已将扩展布局插入 `container`，而**传递 true 值会在最终布局中创建一个多余的视图组。**）
+
+  ```java
+  public static class ExampleFragment extends Fragment {
+      @Override
+      public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                               Bundle savedInstanceState) {
+          // Inflate the layout for this fragment
+          return inflater.inflate(R.layout.example_fragment, container, false);
+      }
+  }
+  ```
+
+
+
+```java
+// Create new fragment and transaction
+Fragment newFragment = new ExampleFragment();
+FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+// Replace whatever is in the fragment_container view with this fragment,
+// and add the transaction to the back stack
+transaction.replace(R.id.fragment_container, newFragment);
+transaction.addToBackStack(null);
+
+// Commit the transaction
+transaction.commit();
+```
+
+调用 `addToBackStack()`，您可以将替换事务保存到返回栈，以便用户能够通过按*返回*按钮撤消事务并回退到上一片段。
+
+> 例如，如果某个新闻应用的 Activity 有两个片段，其中一个用于显示文章列表（片段 A），另一个用于显示文章（片段 B），则片段 A 必须在列表项被选定后告知 Activity，以便它告知片段 B 显示该文章。
+
+```java
+public static class FragmentA extends ListFragment {
+    ...
+    // Container Activity must implement this interface
+    public interface OnArticleSelectedListener {
+        public void onArticleSelected(Uri articleUri);
+    }
+    ...
+    OnArticleSelectedListener listener;
+    ...
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            listener = (OnArticleSelectedListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+    
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // Append the clicked item's row ID with the content provider Uri
+        Uri noteUri = ContentUris.withAppendedId(ArticleColumns.CONTENT_URI, id);
+        // Send the event and Uri to the host activity
+        listener.onArticleSelected(noteUri);
+    }
+}
+```
+
+```
+onAttach()
+```
+
+在片段已与 Activity 关联时进行调用（`Activity` 传递到此方法内）。
+
+```
+onCreateView()
+```
+
+调用它可创建与片段关联的视图层次结构。
+
+```
+onActivityCreated()
+```
+
+当 Activity 的 `onCreate()` 方法已返回时进行调用。
+
+```
+onDestroyView()
+```
+
+在移除与片段关联的视图层次结构时进行调用。
+
+```
+onDetach()
+```
+
+在取消片段与 Activity 的关联时进行调用。
+
+
+
+- Fragment 之间传递数据
+
+Fragment A 
+
+```java
+@Override
+public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    getParentFragmentManager().setFragmentResultListener("key", this, new FragmentResultListener() {
+        @Override
+        public void onFragmentResult(@NonNull String key, @NonNull Bundle bundle) {
+            // We use a String here, but any type that can be put in a Bundle is supported
+            String result = bundle.getString("bundleKey");
+            // Do something with the result...
+        }
+    });
+}
+```
+
+Fragment B
+
+```java
+button.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        Bundle result = new Bundle();
+        result.putString("bundleKey", "result");
+        getParentFragmentManager().setFragmentResult("requestKey", result);
+    }
+});
+```
+
+如需在 Fragment 之间通信，建议创建一个共享的 [`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) 对象。两个 Fragment 都可以通过所在的 Activity 访问 ViewModel。Fragment 可在 ViewModel 内更新数据，如果使用 [`LiveData`](https://developer.android.com/reference/androidx/lifecycle/LiveData) 公开该数据，新状态会被推送至其他 Fragment（只要它正在从 ViewModel 观察 LiveData）。要了解如何实现这种通信机制，请参阅 [ViewModel 指南](https://developer.android.com/topic/libraries/architecture/viewmodel)中的“在 Fragment 之间共享数据”部分。
+
+
+
+
+
