@@ -1236,5 +1236,218 @@ button.setOnClickListener(new View.OnClickListener() {
 
 
 
+#### 4.4 Intent
+
+**注意：**为了确保应用的安全性，启动 `Service` 时，请始终使用显式 Intent，且不要为服务声明 Intent 过滤器。使用隐式 Intent 启动服务存在安全隐患，因为您无法确定哪些服务将响应 Intent，且用户无法看到哪些服务已启动。从 Android 5.0（API 级别 21）开始，如果使用隐式 Intent 调用 `bindService()`，系统会抛出异常。
+
+```java
+// Create the text message with a string
+Intent sendIntent = new Intent();
+sendIntent.setAction(Intent.ACTION_SEND);
+sendIntent.putExtra(Intent.EXTRA_TEXT, textMessage);
+sendIntent.setType("text/plain");
+
+// Verify that the intent will resolve to an activity
+if (sendIntent.resolveActivity(getPackageManager()) != null) {
+    startActivity(sendIntent);
+}
+```
 
 
+
+##### 4.4.1相机
+
+**请注意：**当您使用 `ACTION_IMAGE_CAPTURE` 拍摄照片时，相机可能还会在结果 `Intent` 中返回缩小尺寸的照片副本（缩略图），这个副本以 `Bitmap` 形式保存在名为 `"data"` 的 extra 字段中。
+
+```java
+static final int REQUEST_IMAGE_CAPTURE = 1;
+static final Uri locationForPhotos;
+
+public void capturePhoto(String targetFilename) {
+    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    intent.putExtra(MediaStore.EXTRA_OUTPUT,
+            Uri.withAppendedPath(locationForPhotos, targetFilename));
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+    }
+} 
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+        Bitmap thumbnail = data.getParcelableExtra("data");
+        // Do other work with full size photo saved in locationForPhotos
+        ...
+    }
+}
+```
+
+### 5、界面
+
+#### 5.1 使用 <merge> 标记
+
+将此布局添加到其他布局中（使用 `<include/>` 标记）时，系统会忽略 `<merge>` 元素并直接在布局中放置两个按钮，以代替 `<include/>` 标记。
+
+```xml
+<merge xmlns:android="http://schemas.android.com/apk/res/android"> 
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add"/> 
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/delete"/> 
+</merge>
+```
+
+#### 5.2 [完全自定义的组件](https://developer.android.com/guide/topics/ui/custom-components)
+
+| 类别                                      | 方法                                         | 说明                                                         |
+| :---------------------------------------- | :------------------------------------------- | :----------------------------------------------------------- |
+| 创建                                      | 构造函数                                     | 包含在从代码创建视图时调用的构造函数形式和在从布局文件扩充视图时调用的构造函数形式。第二种形式的构造函数应解析并应用布局文件中定义的任何属性。 |
+| `onFinishInflate()```                     | 在视图及其所有子级都已从 XML 扩充之后调用。  |                                                              |
+| 布局                                      | `onMeasure(int, int)```                      | 调用以确定此视图及其所有子级的大小要求。                     |
+| `onLayout(boolean, int, int, int, int)``` | 在此视图应为其所有子级分配大小和位置时调用。 |                                                              |
+| `onSizeChanged(int, int, int, int)```     | 在此视图的大小发生变化时调用。               |                                                              |
+| 绘制                                      | `onDraw(Canvas)```                           | 在视图应渲染其内容时调用。                                   |
+| 事件处理                                  | `onKeyDown(int, KeyEvent)```                 | 在发生新的按键事件时调用。                                   |
+| `onKeyUp(int, KeyEvent)```                | 在发生松开按键事件时调用。                   |                                                              |
+| `onTrackballEvent(MotionEvent)```         | 在发生轨迹球动作事件时调用。                 |                                                              |
+| `onTouchEvent(MotionEvent)```             | 在发生触屏动作事件时调用。                   |                                                              |
+| 焦点                                      | `onFocusChanged(boolean, int, Rect)```       | 在视图获得或失去焦点时调用。                                 |
+| `onWindowFocusChanged(boolean)```         | 在包含视图的窗口获得或失去焦点时调用。       |                                                              |
+| 附加                                      | `onAttachedToWindow()```                     | 在视图附加到窗口时调用。                                     |
+| `onDetachedFromWindow()```                | 在视图与其窗口分离时调用。                   |                                                              |
+| `onWindowVisibilityChanged(int)```        | 在包含视图的窗口的可见性发生变化时调用。     |                                                              |
+
+**命名空间**：
+
+不属于 `http://schemas.android.com/apk/res/android` 命名空间，而是属于 `http://schemas.android.com/apk/res/[your package name]`
+
+如果视图类是**内部类**，您必须使用视图外部类的名称进一步限定。例如，`PieChart` 类有一个名为 `PieView` 的内部类。如需使用此类中的自定义属性，您需要使用 `com.example.customviews.charting.PieChart$PieView` 标记。
+
+```xml
+ <?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"   xmlns:custom="http://schemas.android.com/apk/res/com.example.customviews">
+     <com.example.customviews.charting.PieChart
+         custom:showText="true"
+         custom:labelPosition="left" />
+    </LinearLayout>
+```
+
+
+
+- 需要绘制什么，由 `Canvas` 处理
+- 如何绘制，由 `Paint` 处理。
+
+```java
+ private void init() {
+       textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+       textPaint.setColor(textColor);
+       if (textHeight == 0) {
+           textHeight = textPaint.getTextSize();
+       } else {
+           textPaint.setTextSize(textHeight);
+       }
+
+       piePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+       piePaint.setStyle(Paint.Style.FILL);
+       piePaint.setTextSize(textHeight);
+
+       shadowPaint = new Paint(0);
+       shadowPaint.setColor(0xff101010);
+       shadowPaint.setMaskFilter(new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL));
+```
+
+- 手势识别
+
+  ```java
+   class MyListener extends GestureDetector.SimpleOnGestureListener {
+         @Override
+         public boolean onDown(MotionEvent e) {
+             return true;
+         }
+      }
+      detector = new GestureDetector(PieChart.this.getContext(), new MyListener());
+  
+  
+      //具体处理
+      @Override
+      public boolean onTouchEvent(MotionEvent event) {
+         boolean result = detector.onTouchEvent(event);
+         if (!result) {
+             if (event.getAction() == MotionEvent.ACTION_UP) {
+                 stopScrolling();
+                 result = true;
+             }
+         }
+         return result;
+      }
+  ```
+
+
+
+  - 视图高度
+
+    要设置某个视图的默认（静止）高度，请在 XML 布局中使用 `android:elevation` 属性。如果要在 Activity 的代码中设置视图高度，请使用 `View.setElevation()` 方法。
+
+    如果要设置视图转换，请使用 `View.setTranslationZ()` 方法。
+
+```xml
+<TextView
+        android:id="@+id/myview"
+        ...
+        android:elevation="2dp"
+        android:background="@drawable/myrect" />
+
+
+<!-- res/drawable/myrect.xml -->
+    <shape xmlns:android="http://schemas.android.com/apk/res/android"
+           android:shape="rectangle">
+        <solid android:color="#42000000" />
+        <corners android:radius="5dp" />
+    </shape>
+```
+
+
+
+
+
+
+
+
+
+### [adb命令](https://developer.android.com/studio/command-line/adb#shellcommands)
+
+使用 `adb` 触发一个 Intent
+
+```
+adb shell am start -a <ACTION> -t <MIME_TYPE> -d <DATA> \
+  -e <EXTRA_NAME> <EXTRA_VALUE> -n <ACTIVITY>
+  
+adb shell am start -a android.intent.action.DIAL \
+  -d tel:555-5555 -n org.example.MyApp/.MyActivity
+```
+
+#### 录制视频
+
+```
+$ adb shell
+shell@ $ screenrecord --verbose /sdcard/demo.mp4
+(press Control + C to stop)
+shell@ $ exit
+$ adb pull /sdcard/demo.mp4
+```
+
+#### 截取屏幕截图
+
+```
+$ adb shell
+shell@ $ screencap /sdcard/screen.png
+shell@ $ exit
+$ adb pull /sdcard/screen.png
+```
+
+```
+adb shell am start -a android.intent.action.VIEW
+```
