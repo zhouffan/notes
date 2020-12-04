@@ -1409,6 +1409,720 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     </shape>
 ```
 
+#### 5.3 通知
+
+从 Android 5.0 开始，通知可以显示在锁定屏幕上。
+
+通知的设计由系统模板决定，您的应用只需要定义模板中各个部分的内容即可。通知的部分详情仅在展开后视图中显示。
+
+![img](https://developer.android.com/images/ui/notifications/notification-callouts_2x.png)
+
+**图 7.** 包含基本详情的通知
+
+
+
+图 7 展示了通知最常见的部分，具体如下所示：
+
+1. 小图标：必须提供，通过 `setSmallIcon()` 进行设置。
+
+2. 应用名称：由系统提供。
+
+3. 时间戳：由系统提供，但您可以通过 `setWhen()` 将其替换掉或者通过 `setShowWhen(false)` 将其隐藏。
+
+4. 大图标：可选内容（通常仅用于联系人照片，请勿将其用于应用图标），通过 `setLargeIcon()` 进行设置。
+
+5. 标题：可选内容，通过 `setContentTitle()` 进行设置。
+
+6. 文本：可选内容，通过 `setContentText()` 进行设置。
+
+   
+
+**注意**：如果同一应用发出 4 条或更多条通知且未指定分组，则系统会自动将这些通知分为一组。
+
+```java
+        // Create an explicit intent for an Activity in your app
+    Intent intent = new Intent(this, AlertDetails.class);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+    PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.notification_icon)
+            .setContentTitle("My notification")
+            .setContentText("Hello World!")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            // Set the intent that will fire when the user taps the notification
+            .setContentIntent(pendingIntent)
+        	.addAction(R.drawable.ic_snooze, getString(R.string.snooze),
+                    snoozePendingIntent)
+            .setAutoCancel(true);
+
+
+	//显示通知
+    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+    // notificationId is a unique int for each notification that you must define
+    notificationManager.notify(notificationId, builder.build());
+```
+
+- 隐藏状态栏
+
+```java
+    View decorView = getWindow().getDecorView();
+    // Hide the status bar.
+    int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+    decorView.setSystemUiVisibility(uiOptions);
+    // Remember that you should never show the action bar if the
+    // status bar is hidden, so hide that too if necessary.
+    ActionBar actionBar = getActionBar();
+    actionBar.hide();
+    
+
+   // Hide the status bar.
+    window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+    // Remember that you should never show the action bar if the
+    // status bar is hidden, so hide that too if necessary.
+    actionBar?.hide()
+
+```
+
+
+
+- 隐藏导航栏
+
+  ```java
+  View decorView = getWindow().getDecorView();
+      // Hide both the navigation bar and the status bar.
+      // SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
+      // a general rule, you should design your app to hide the status bar whenever you
+      // hide the navigation bar.
+      int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN;
+      decorView.setSystemUiVisibility(uiOptions);
+      
+  ```
+
+#### 5.4 拖放
+
+用户使用拖拽手势（通常是长按视图对象）开始拖拽。
+
+```java
+    // Create a string for the ImageView label
+    private static final String IMAGEVIEW_TAG = "icon bitmap"
+
+    // Creates a new ImageView
+    ImageView imageView = new ImageView(this);
+
+    // Sets the bitmap for the ImageView from an icon bit map (defined elsewhere)
+    imageView.setImageBitmap(iconBitmap);
+
+    // Sets the tag
+    imageView.setTag(IMAGEVIEW_TAG);
+
+        ...
+
+    // Sets a long click listener for the ImageView using an anonymous listener object that
+    // implements the OnLongClickListener interface
+    imageView.setOnLongClickListener(new View.OnLongClickListener() {
+
+        // Defines the one method for the interface, which is called when the View is long-clicked
+        public boolean onLongClick(View v) {
+
+        // Create a new ClipData.
+        // This is done in two steps to provide clarity. The convenience method
+        // ClipData.newPlainText() can create a plain text ClipData in one step.
+
+        // Create a new ClipData.Item from the ImageView object's tag
+        ClipData.Item item = new ClipData.Item(v.getTag());
+
+        // Create a new ClipData using the tag as a label, the plain text MIME type, and
+        // the already-created item. This will create a new ClipDescription object within the
+        // ClipData, and set its MIME type entry to "text/plain"
+        ClipData dragData = new ClipData(
+            v.getTag(),
+            new String[] { ClipDescription.MIMETYPE_TEXT_PLAIN },
+            item);
+
+        // Instantiates the drag shadow builder.
+        View.DragShadowBuilder myShadow = new MyDragShadowBuilder(imageView);
+
+        // Starts the drag
+
+                v.startDrag(dragData,  // the data to be dragged
+                            myShadow,  // the drag shadow builder
+                            null,      // no need to use local data
+                            0          // flags (not currently used, set to 0)
+                );
+
+        }
+    }
+    
+```
+
+#### 5.5画中画
+
+默认情况下，系统不会自动为应用提供画中画支持。要想在应用中支持画中画，您可以通过将 `android:supportsPictureInPicture` 和 `android:resizeableActivity` 设置为 `true`
+
+```xml
+    <activity android:name="VideoActivity"
+        android:resizeableActivity="true"
+        android:supportsPictureInPicture="true"
+        android:configChanges=
+            "screenSize|smallestScreenSize|screenLayout|orientation"
+        ...
+    
+```
+
+要进入画中画模式，Activity 必须调用 `enterPictureInPictureMode()`。
+
+
+
+### 6、动画********
+
+| 类/接口                            | 说明                                                         |
+| :--------------------------------- | :----------------------------------------------------------- |
+| `AccelerateDecelerateInterpolator` | 该插值器的变化率在开始和结束时缓慢但在中间会加快。           |
+| `AccelerateInterpolator`           | 该插值器的变化率在开始时较为缓慢，然后会加快。               |
+| `AnticipateInterpolator`           | 该插值器先反向变化，然后再急速正向变化。                     |
+| `AnticipateOvershootInterpolator`  | 该插值器先反向变化，再急速正向变化，然后超过定位值，最后返回到最终值。 |
+| `BounceInterpolator`               | 该插值器的变化会跳过结尾处。                                 |
+| `CycleInterpolator`                | 该插值器的动画会在指定数量的周期内重复。                     |
+| `DecelerateInterpolator`           | 该插值器的变化率开始很快，然后减速。                         |
+| `LinearInterpolator`               | 该插值器的变化率恒定不变。                                   |
+| `OvershootInterpolator`            | 该插值器会急速正向变化，再超出最终值，然后返回。             |
+| `TimeInterpolator`                 | 该接口用于实现您自己的插值器。                               |
+
+| 类               | 说明                                                         |
+| :--------------- | :----------------------------------------------------------- |
+| `ValueAnimator`  | 属性动画的主计时引擎，它也可计算要添加动画效果的属性的值。它具有计算动画值所需的所有核心功能，同时包含每个动画的计时详情、有关动画是否重复播放的信息、用于接收更新事件的监听器以及设置待评估自定义类型的功能。为属性添加动画效果分为两个步骤：计算添加动画效果之后的值，以及对要添加动画效果的对象和属性设置这些值。`ValueAnimator` 不会执行第二个步骤，因此，您必须监听由 `ValueAnimator` 计算的值的更新情况，并使用您自己的逻辑修改要添加动画效果的对象。如需了解详情，请参阅[使用 ValueAnimator 添加动画效果](https://developer.android.com/guide/topics/graphics/prop-animation#value-animator)部分。 |
+| `ObjectAnimator` | `ValueAnimator` 的子类，用于设置目标对象和对象属性以添加动画效果。此类会在计算出动画的新值后相应地更新属性。在大多数情况下，您不妨使用 `ObjectAnimator`，因为它可以极大地简化对目标对象的值添加动画效果这一过程。不过，有时您需要直接使用 `ValueAnimator`，因为 `ObjectAnimator` 存在其他一些限制，例如要求目标对象具有特定的访问器方法。 |
+| `AnimatorSet`    | 此类提供一种将动画分组在一起的机制，以使它们彼此相对运行。您可以将动画设置为一起播放、按顺序播放或者在指定的延迟时间后播放。如需了解详情，请参阅[使用 AnimatorSet 编排多个动画](https://developer.android.com/guide/topics/graphics/prop-animation#choreography)部分。 |
+
+```java
+    ObjectAnimator animation = ObjectAnimator.ofFloat(textView, "translationX", 100f);
+    animation.setDuration(1000);
+    animation.start();
+```
+
+- AnimatorSet 编排多个动画
+
+```java
+	AnimatorSet bouncer = new AnimatorSet();
+    bouncer.play(bounceAnim).before(squashAnim1);
+    bouncer.play(squashAnim1).with(squashAnim2);
+    bouncer.play(squashAnim1).with(stretchAnim1);
+    bouncer.play(squashAnim1).with(stretchAnim2);
+    bouncer.play(bounceBackAnim).after(stretchAnim2);
+    ValueAnimator fadeAnim = ObjectAnimator.ofFloat(newBall, "alpha", 1f, 0f);
+    fadeAnim.setDuration(250);
+    AnimatorSet animatorSet = new AnimatorSet();
+    animatorSet.play(bouncer).before(fadeAnim);
+    animatorSet.start();
+```
+
+- 为卡片翻转添加动画
+
+```java
+getSupportFragmentManager()
+                    .beginTransaction()
+
+                    // Replace the default fragment animations with animator resources
+                    // representing rotations when switching to the back of the card, as
+                    // well as animator resources representing rotations when flipping
+                    // back to the front (e.g. when the system Back button is pressed).
+                    .setCustomAnimations(
+                            R.animator.card_flip_right_in,
+                            R.animator.card_flip_right_out,
+                            R.animator.card_flip_left_in,
+                            R.animator.card_flip_left_out)
+
+                    // Replace any fragments currently in the container view with a
+                    // fragment representing the next page (indicated by the
+                    // just-incremented currentPage variable).
+                    .replace(R.id.container, new CardBackFragment())
+
+                    // Add this transaction to the back stack, allowing users to press
+                    // Back to get to the front of the card.
+                    .addToBackStack(null)
+
+                    // Commit the transaction.
+                    .commit();
+```
+
+- 自动为布局更新添加动画
+
+  ```xml
+      <LinearLayout android:id="@+id/container"
+          android:animateLayoutChanges="true"
+          ...
+      />
+      
+  ```
+
+
+
+- Activity 过渡 API 适用于 Android 5.0 (API 21) 及更高版本。
+
+
+
+### 7、视频
+
+#### 唤醒锁定
+
+为了确保您的 Service 在这些情况下能继续运行，您必须使用“唤醒锁定”。唤醒锁定可以告诉系统：您的应用正在使用一些即使在手机处于闲置状态时也应该可用的功能。
+
+**注意**：您应始终谨慎使用唤醒锁定，并只使其保留必要的时长，因为它们会显著缩短设备的电池续航时间。
+
+```java
+    mediaPlayer = new MediaPlayer();
+    // ... other initialization here ...
+    mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+```
+
+#### 7.1 mediaRecorder 音频
+
+```java
+    package com.android.audiorecordtest;
+
+    import android.Manifest;
+    import android.content.Context;
+    import android.content.pm.PackageManager;
+    import android.media.MediaPlayer;
+    import android.media.MediaRecorder;
+    import android.os.Bundle;
+    import android.support.annotation.NonNull;
+    import android.support.v4.app.ActivityCompat;
+    import android.support.v7.app.AppCompatActivity;
+    import android.util.Log;
+    import android.view.View;
+    import android.view.ViewGroup;
+    import android.widget.Button;
+    import android.widget.LinearLayout;
+
+    import java.io.IOException;
+
+    public class AudioRecordTest extends AppCompatActivity {
+
+        private static final String LOG_TAG = "AudioRecordTest";
+        private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+        private static String fileName = null;
+
+        private RecordButton recordButton = null;
+        private MediaRecorder recorder = null;
+
+        private PlayButton   playButton = null;
+        private MediaPlayer   player = null;
+
+        // Requesting permission to RECORD_AUDIO
+        private boolean permissionToRecordAccepted = false;
+        private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+
+        @Override
+        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            switch (requestCode){
+                case REQUEST_RECORD_AUDIO_PERMISSION:
+                    permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    break;
+            }
+            if (!permissionToRecordAccepted ) finish();
+
+        }
+
+        private void onRecord(boolean start) {
+            if (start) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        private void onPlay(boolean start) {
+            if (start) {
+                startPlaying();
+            } else {
+                stopPlaying();
+            }
+        }
+
+        private void startPlaying() {
+            player = new MediaPlayer();
+            try {
+                player.setDataSource(fileName);
+                player.prepare();
+                player.start();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "prepare() failed");
+            }
+        }
+
+        private void stopPlaying() {
+            player.release();
+            player = null;
+        }
+
+        private void startRecording() {
+            recorder = new MediaRecorder();
+            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            recorder.setOutputFile(fileName);
+            recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+            try {
+                recorder.prepare();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "prepare() failed");
+            }
+
+            recorder.start();
+        }
+
+        private void stopRecording() {
+            recorder.stop();
+            recorder.release();
+            recorder = null;
+        }
+
+        class RecordButton extends Button {
+            boolean mStartRecording = true;
+
+            OnClickListener clicker = new OnClickListener() {
+                public void onClick(View v) {
+                    onRecord(mStartRecording);
+                    if (mStartRecording) {
+                        setText("Stop recording");
+                    } else {
+                        setText("Start recording");
+                    }
+                    mStartRecording = !mStartRecording;
+                }
+            };
+
+            public RecordButton(Context ctx) {
+                super(ctx);
+                setText("Start recording");
+                setOnClickListener(clicker);
+            }
+        }
+
+        class PlayButton extends Button {
+            boolean mStartPlaying = true;
+
+            OnClickListener clicker = new OnClickListener() {
+                public void onClick(View v) {
+                    onPlay(mStartPlaying);
+                    if (mStartPlaying) {
+                        setText("Stop playing");
+                    } else {
+                        setText("Start playing");
+                    }
+                    mStartPlaying = !mStartPlaying;
+                }
+            };
+
+            public PlayButton(Context ctx) {
+                super(ctx);
+                setText("Start playing");
+                setOnClickListener(clicker);
+            }
+        }
+
+        @Override
+        public void onCreate(Bundle icicle) {
+            super.onCreate(icicle);
+
+            // Record to the external cache directory for visibility
+            fileName = getExternalCacheDir().getAbsolutePath();
+            fileName += "/audiorecordtest.3gp";
+
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
+            LinearLayout ll = new LinearLayout(this);
+            recordButton = new RecordButton(this);
+            ll.addView(recordButton,
+                    new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            0));
+            playButton = new PlayButton(this);
+            ll.addView(playButton,
+                    new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            0));
+            setContentView(ll);
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+            if (recorder != null) {
+                recorder.release();
+                recorder = null;
+            }
+
+            if (player != null) {
+                player.release();
+                player = null;
+            }
+        }
+    } 
+```
+
+### 8、service
+
+[Service](https://developer.android.com/reference/android/app/Service)
+
+服务默认使用应用的主线程， 需要创建线程。
+
+[IntentService](https://developer.android.com/reference/android/app/IntentService)
+
+- 是 `Service` 的子类，创建默认的工作线程。
+
+- 处理完所有启动请求后停止服务，因此您永远不必调用 `stopSelf()`。
+
+- 如要完成客户端提供的工作，请实现 `onHandleIntent()`
+- 除 `onHandleIntent()` 之外，您无需从中调用超类的唯一方法就是 `onBind()`。只有在服务允许绑定时，您才需实现该方法。
+
+```java
+public class HelloIntentService extends IntentService {
+
+  /**
+   * A constructor is required, and must call the super <code><a href="/reference/android/app/IntentService.html#IntentService(java.lang.String)">IntentService(String)</a></code>
+   * constructor with a name for the worker thread.
+   */
+  public HelloIntentService() {
+      super("HelloIntentService");
+  }
+
+  /**
+   * The IntentService calls this method from the default worker thread with
+   * the intent that started the service. When this method returns, IntentService
+   * stops the service, as appropriate.
+   */
+  @Override
+  protected void onHandleIntent(Intent intent) {
+      // Normally we would do some work here, like download a file.
+      // For our sample, we just sleep for 5 seconds.
+      try {
+          Thread.sleep(5000);
+      } catch (InterruptedException e) {
+          // Restore interrupt status.
+          Thread.currentThread().interrupt();
+      }
+  }
+}
+```
+
+与上述使用 `IntentService` 的示例完全相同。
+
+```java
+public class HelloService extends Service {
+  private Looper serviceLooper;
+  private ServiceHandler serviceHandler;
+
+  // Handler that receives messages from the thread
+  private final class ServiceHandler extends Handler {
+      public ServiceHandler(Looper looper) {
+          super(looper);
+      }
+      @Override
+      public void handleMessage(Message msg) {
+          // Normally we would do some work here, like download a file.
+          // For our sample, we just sleep for 5 seconds.
+          try {
+              Thread.sleep(5000);
+          } catch (InterruptedException e) {
+              // Restore interrupt status.
+              Thread.currentThread().interrupt();
+          }
+          // Stop the service using the startId, so that we don't stop
+          // the service in the middle of handling another job
+          stopSelf(msg.arg1);
+      }
+  }
+
+  @Override
+  public void onCreate() {
+    // Start up the thread running the service. Note that we create a
+    // separate thread because the service normally runs in the process's
+    // main thread, which we don't want to block. We also make it
+    // background priority so CPU-intensive work doesn't disrupt our UI.
+    HandlerThread thread = new HandlerThread("ServiceStartArguments",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    thread.start();
+
+    // Get the HandlerThread's Looper and use it for our Handler
+    serviceLooper = thread.getLooper();
+    serviceHandler = new ServiceHandler(serviceLooper);
+  }
+
+  @Override
+  public int onStartCommand(Intent intent, int flags, int startId) {
+      Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+
+      // For each start request, send a message to start a job and deliver the
+      // start ID so we know which request we're stopping when we finish the job
+      Message msg = serviceHandler.obtainMessage();
+      msg.arg1 = startId;
+      serviceHandler.sendMessage(msg);
+
+      // If we get killed, after returning from here, restart
+      return START_STICKY;
+  }
+
+  @Override
+  public IBinder onBind(Intent intent) {
+      // We don't provide binding, so return null
+      return null;
+  }
+
+  @Override
+  public void onDestroy() {
+    Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
+  }
+}
+```
+
+```
+START_NOT_STICKY
+```
+
+如果系统在 `onStartCommand()` 返回后终止服务，则除非有待传递的挂起 Intent，否则系统*不会*重建服务。这是最安全的选项，可以避免在不必要时以及应用能够轻松重启所有未完成的作业时运行服务。
+
+```
+START_STICKY
+```
+
+如果系统在 `onStartCommand()` 返回后终止服务，则其会重建服务并调用 `onStartCommand()`，但*不会*重新传递最后一个 Intent。相反，除非有挂起 Intent 要启动服务，否则系统会调用包含空 Intent 的 `onStartCommand()`。在此情况下，系统会传递这些 Intent。此常量适用于不执行命令、但无限期运行并等待作业的媒体播放器（或类似服务）。
+
+```
+START_REDELIVER_INTENT
+```
+
+如果系统在 `onStartCommand()` 返回后终止服务，则其会重建服务，并通过传递给服务的最后一个 Intent 调用 `onStartCommand()`。所有挂起 Intent 均依次传递。此常量适用于主动执行应立即恢复的作业（例如下载文件）的服务。
+
+
+
+- 前台服务
+
+  例如，应将通过服务播放音乐的音乐播放器设置为在前台运行，因为用户会明确意识到其操作。状态栏中的通知可能表示正在播放的歌曲，并且其允许用户通过启动 Activity 与音乐播放器进行交互。同样，如果应用允许用户追踪其运行，则需通过前台服务来追踪用户的位置。
+
+```java
+Intent notificationIntent = new Intent(this, ExampleActivity.class);
+PendingIntent pendingIntent =
+        PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+Notification notification =
+          new Notification.Builder(this, CHANNEL_DEFAULT_IMPORTANCE)
+    .setContentTitle(getText(R.string.notification_title))
+    .setContentText(getText(R.string.notification_message))
+    .setSmallIcon(R.drawable.icon)
+    .setContentIntent(pendingIntent)
+    .setTicker(getText(R.string.ticker_text))
+    .build();
+
+startForeground(ONGOING_NOTIFICATION_ID, notification);
+```
+
+
+
+```java
+public class ExampleService extends Service {
+    int startMode;       // indicates how to behave if the service is killed
+    IBinder binder;      // interface for clients that bind
+    boolean allowRebind; // indicates whether onRebind should be used
+
+    @Override
+    public void onCreate() {
+        // The service is being created
+    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        // The service is starting, due to a call to startService()
+        return mStartMode;
+    }
+    @Override
+    public IBinder onBind(Intent intent) {
+        // A client is binding to the service with bindService()
+        return mBinder;
+    }
+    @Override
+    public boolean onUnbind(Intent intent) {
+        // All clients have unbound with unbindService()
+        return mAllowRebind;
+    }
+    @Override
+    public void onRebind(Intent intent) {
+        // A client is binding to the service with bindService(),
+        // after onUnbind() has already been called
+    }
+    @Override
+    public void onDestroy() {
+        // The service is no longer used and is being destroyed
+    }
+}
+```
+
+**注意：**与 Activity 生命周期回调方法不同，您*不*需要调用这些回调方法的超类实现。
+
+
+
+### 9、后台任务-线程池
+
+
+
+创建多个线程：使用 [`ExecutorService`](https://developer.android.com/reference/java/util/concurrent/ExecutorService) 接口，创建线程的成本很高，务必将 [`ExecutorService`](https://developer.android.com/reference/java/util/concurrent/ExecutorService) 的实例保存在 `Application` 类或[依赖项注入容器](https://developer.android.com/training/dependency-injection/manual)中。
+
+```java
+public class MyApplication extends Application {
+    ExecutorService executorService = Executors.newFixedThreadPool(4);
+}
+```
+
+```java
+public class LoginRepository {
+    ...
+    private final Executor executor;
+
+    public LoginRepository(LoginResponseParser responseParser, Executor executor) {
+        this.responseParser = responseParser;
+        this.executor = executor;
+    }
+    ...
+     public void makeLoginRequest(final String jsonBody) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Result<LoginResponse> ignoredResponse = makeSynchronousLoginRequest(jsonBody);
+            }
+        });
+    }
+
+    public Result<LoginResponse> makeSynchronousLoginRequest(String jsonBody) {
+        ... // HttpURLConnection logic
+    }
+}
+```
+
+
+
+- 使屏幕保持开启状态
+
+```java
+    public class MainActivity extends Activity {
+      @Override
+      protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+      }
+    }
+```
+
+
+
+
+
 
 
 
