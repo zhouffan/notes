@@ -216,6 +216,174 @@ result?.apply{
 }
 ```
 
+#### 2.6 对比总结
+
+**let**
+
+// 作用1：使用it替代object对象去访问其公有的属性 & 方法 
+
+// 作用2：判断object为null的操作
+
+// 注：返回值 = 最后一行 / return的表达式
+
+```
+object?.let{//表示object不为null的条件下，才会去执行let函数体
+   it.function1() 
+   it.function2() 
+}
+```
+
+
+
+------------------------------------------------------------
+
+**also**
+
+类似let函数，但区别在于返回值：
+
+- let函数：返回值 = 最后一行 / return的表达式
+
+- also函数：返回值 = 传入的对象的本身
+
+--------------------------------------------------------------
+
+**with**
+
+省去对象名，直接调用方法名 / 属性即可 
+
+```
+// kotlin
+val people = People("carson", 25)
+with(people) {
+    println("my name is $name, I am $age years old")
+} 
+```
+
+
+
+---------------------------------------
+
+**run**
+
+`结合了let、with两个函数的作用`
+
+省去对象名，直接调用方法名 / 属性即可
+
+统一做判空处理 
+
+```
+val people = People("carson", 25)
+people?.run{
+    println("my name is $name, I am $age years old")
+}
+```
+
+-------------------
+
+**apply**
+
+与run类似，区别在于返回值
+
+- run函数返回最后一行的值 / 表达式
+- apply函数返回传入的对象的本身 
+
+![img](https://imgconvert.csdnimg.cn/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy85NDQzNjUtY2MzMTNkODU4MTFhNzhmMi5wbmc?x-oss-process=image/format,png)
+
+
+
+### 3、语法糖（for-in/is/as/===/?./!!.）
+
+#### 3.1范围使用
+
+```kotlin
+//作用：闭区间，[1,10]   step：步长
+for (i in 1..10 step 2){
+    print(i)
+}
+//作用：开区间[1,10)   step：步长
+for (i in 1 until 10){
+    print(i)
+}
+//作用：倒序判断
+for (i in 10 downTo 1){
+    print(i)
+}
+//在...范围内
+var i = 20
+if (i !in 1..15){
+    println("xxxx")
+}else{
+    println("yyyyy")
+}
+```
+
+#### 3.2 类型检查 & 转换
+
+```kotlin
+//is判断类型， 并且类型自动转换 
+var a: Any = 1
+if(a !is Int){
+    println("输出1：$a")
+}else{
+    println("输出2："+(a + 1))
+}
+when(a){
+    is String-> print("$a----b")
+    is Int-> print(a+1)
+}
+//as 强转   ?避免抛出异常
+var str = null
+var l = str as? Int
+print(l)
+```
+
+#### 3.3 相等性判断
+
+```kotlin
+var u1 = User("z1", 1)
+var u2 = User("z1", 1)
+var u3 = u1
+//结构相等：equals 或者 ==
+if(u1 == u3){//true
+    println("true")
+}else{
+    println("false")
+}
+//引用相等：===
+if(u2 === u3){//false
+    println("true")
+}else{
+    println("false")
+}
+```
+
+#### 3.4 空安全
+
+```kotlin
+//Kotlin中，有两种情况导致NullPointerException
+// 情况1：显式调用 throw NullPointerException()
+if(true){
+    throw NullPointerException("主动抛出")
+}
+// 情况2：使用!! 操作符
+var u: User? = null
+var age = u!!.age
+print(age)
+//===================注：String类型变量不能容纳null，若要容纳null，添加?
+var b: String? = "b"
+b = null
+//===================注：安全调用操作符   .前加?
+var a = u?.age
+//链式调用
+var a2 = a?.b?.c?.d
+```
+
+
+
+
+
+
+
 
 
 ### 示例对比

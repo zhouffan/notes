@@ -2165,3 +2165,71 @@ $ adb pull /sdcard/screen.png
 ```
 adb shell am start -a android.intent.action.VIEW
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### [jetpack汇总](https://carsonho.blog.csdn.net/article/details/104243841)
+
+
+
+Android Jetpack的组件主要分为四大类：
+
+- 基础 - `Foundation`
+
+  > 提供了最基础的底层功能，如向后兼容性、测试、开发语言Kotlin支持等。包含的组件库
+
+- 架构 - `Architecture`
+
+  > 帮助开发者设计稳健、可测试且易维护的应用
+
+  1. Data Binding(数据绑定)：属于支持库可使用声明式将布局中的界面组件绑定到应用中的数据源
+  2. Lifecycles：管理 Activity 和 Fragment 生命周期
+  3. LiveData：是一个可观察的数据持有者类。与常规observable不同，LiveData是有生命周期感知的。
+  4. Navigation：处理应用内导航所需的一切
+  5. Paging：一次加载 or 按需加载 & 显示小块数据
+  6. Room：帮助开发者更友好、流畅的访问SQLite数据库。
+  7. ViewModel：以生命周期感知的方式存储和管理与UI相关的数据。
+  8. WorkManager：调度预期将要运行的可延迟异步任务。（即便应用程序退出 or重启）
+
+- 行为 - `Behavior`
+
+  > 帮助应用与标准的 Android 服务（如通知、权限、分享和 Google 助理）相集成。包含组件库：
+
+  1. 相机 - CameraX：简化相机应用的开发工作，可向后兼容至 Android 5.0（API 级别 21）
+  2. 下载 - DownloadManager：可处理长时间运行的HTTP下载 & 超时重连
+  3. 多媒体 - Media & playback：用于媒体播放 & 路由的向后兼容 API。
+  4. 通知 - Notifications：提供向后兼容的通知 API，支持 Wear 和 Auto。
+  5. 权限 - Permissions：用于检查和请求应用权限的兼容性 API。
+  6. 偏好设置 - Preferences：提供了能够改变应用的功能和行为能力。
+  7. 共享 - Sharing：提供适合应用操作栏的共享操作。
+  8. 切片 - Slices：创建可在应用外部显示应用数据的灵活界面元素。
+
+- 界面 - `UI`
+
+  > 辅助绘制界面的View类 & 各种辅助组件，包括：
+
+  1. 动画 - Animation & Transitions：提供各类内置动画，也可以自定义动画效果。
+  2. 表情 - Emoji：使用户在未更新系统版本的情况下也可以使用表情符号。
+  3. 布局 - Layout：xml书写的界面布局或者使用Compose完成的界面。
+  4. 调试板 - Palette：从调色板中提取出有用的信息。
+
