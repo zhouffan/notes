@@ -75,6 +75,12 @@
 
 
 
+##### [1.1.4原理](https://www.jianshu.com/p/24c33c221b61)
+
+
+
+
+
 #### 1.2 数据绑定
 
 以申明方式将 可观察数据绑定到界面元素。将布局中的界面组件绑定到应用中的数据源
@@ -229,8 +235,6 @@ android {
 
   
 
-
-
 ##### 1.3.2生命周期感知型组件的最佳做法
 
 - 使界面控制器（Activity 和 Fragment）尽可能保持精简。它们不应试图获取自己的数据，而应使用 [`ViewModel`](https://developer.android.com/reference/androidx/lifecycle/ViewModel) 执行此操作，并观察 [`LiveData`](https://developer.android.com/reference/androidx/lifecycle/LiveData) 对象以将更改体现到视图中。
@@ -257,6 +261,36 @@ android {
 - 停止和开始视频缓冲。使用生命周期感知型组件可尽快开始视频缓冲，但会推迟播放，直到应用完全启动。此外，应用销毁后，您还可以使用生命周期感知型组件终止缓冲。
 - 开始和停止网络连接。借助生命周期感知型组件，可在应用位于前台时启用网络数据的实时更新（流式传输），并在应用进入后台时自动暂停。
 - 暂停和恢复动画可绘制资源。借助生命周期感知型组件，可在应用位于后台时暂停动画可绘制资源，并在应用位于前台后恢复可绘制资源。
+
+
+
+##### 1.3.4 LifeCycle 有三种实现方法
+
+LifeCycle 有三种实现方法：
+
+1. LifecycleObserver 配合 `@OnLifecycleEvent` 注解
+
+2. DefaultLifecycleObserver 拥有宿主所有生命周期事件
+
+   > ```css
+   > implementation "androidx.lifecycle:lifecycle-common-java8:2.2.0"
+   > ```
+   >
+   > 使用 lifecycle-common-java8 依赖后，就可以将 lifecycle-compiler 依赖去掉。
+   >
+   > 最低api ：24
+   >
+   > 
+
+3. LifecycleEventObserver 将宿主生命周期事件封装成 Lifecycle.Event
+
+ 
+
+**建议使用 DefaultLifecycleObserver 和 LifecycleEventObserver 的方式。**
+
+1. Java8 使用 DefaultLifecycleObserver 来实现 Lifecycle，Java7 使用注解的方式。**如果一旦 Java8 成为 Android 的主流后，注解的方式会被弃用。**(所以不建议使用LifecycleObserver)
+2. 如果一个类同时实现了 DefaultLifecycleObserver 接口和 LifecycleEventObserver 接口，那么 DefaultLifecycleObserver 中的方法会先触发，然后才执行 LifecycleEventObserver 的 onStateChanged 方法。
+3. 如果一个类实现了 DefaultLifecycleObserver 接口，同时使用了 `@OnLifecycleEvent` 注解，那么注解的方式会被自动忽略掉。
 
 
 
