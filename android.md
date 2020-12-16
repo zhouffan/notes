@@ -122,6 +122,8 @@ public class ActivityJnject extends AppCompatActivity {
 
 [官网](https://square.github.io/retrofit/)
 
+[Android：手把手带你 深入读懂 Retrofit 2.0 源码](https://www.jianshu.com/p/0c055ad46b6c)     ************
+
 ![img](https://upload-images.jianshu.io/upload_images/21236288-d35bc5858893bd41.png?imageMogr2/auto-orient/strip|imageView2/2/w/1106/format/webp)
 
 
@@ -278,6 +280,190 @@ dependencies {
   kapt "com.alibaba:arouter-compiler:1.2.2"
 }
 ```
+
+
+
+### 7、gradle打包及自定义config.gradle/xx.properties
+
+
+
+```java
+//gradle.properties文件
+android.useDeprecatedNdk=true
+MYAPP_RELEASE_STORE_FILE=app.keystore
+MYAPP_RELEASE_KEY_ALIAS=hls
+MYAPP_RELEASE_STORE_PASSWORD=123123
+
+//build.gradle直接使用
+signingConfigs {
+        release {
+            storeFile file(MYAPP_RELEASE_STORE_FILE)
+            storePassword MYAPP_RELEASE_STORE_PASSWORD
+            keyAlias MYAPP_RELEASE_KEY_ALIAS
+            keyPassword MYAPP_RELEASE_KEY_PASSWORD
+        }
+}
+```
+
+```java
+//根目录自定义keystore.properties
+keyAlias=Key0
+keyPassword=123456
+keystore=../keystore/wanandroid.jks
+storePassword=123456
+    
+//build.gradle使用
+def keystoreFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties();
+keystoreProperties.load(new FileInputStream(keystoreFile))
+
+signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['keystore'])
+            storePassword keystoreProperties['storePassword']
+        }
+}
+```
+
+```java
+//根build.gradle引用自定义配置gradle文件
+apply from: "config22.gradle"
+
+buildscript {
+    repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        google()
+        jcenter() 
+    }
+    
+    
+//新建自定义文件config22.gradle名称
+ext {
+    android = [
+            compileSdkVersion: 28,
+            minSdkVersion    : 21,
+            targetSdkVersion : 28,
+            versionCode      : 1,
+            versionName      : "1.1",
+    ]
+    libsVersion = [
+            butterknife_version = "10.0.0",
+            retrofit_version = "2.6.1",
+            lifecycle_version = "2.2.0",
+    ]
+
+//最终module的build.gradle中使用  rootProject....
+//该文件内部使用自己 butterknife           : "com.jakewharton:butterknife:$rootProject.butterknife_version"
+ext {
+    android = [
+            compileSdkVersion: 28,
+            minSdkVersion    : 21,
+            targetSdkVersion : 28,
+            versionCode      : 1,
+            versionName      : "1.1",
+    ]
+    libsVersion = [
+            butterknife_version = "10.0.0",
+            retrofit_version = "2.6.1",
+            lifecycle_version = "2.2.0",
+    ]
+    dependencies = [
+            appcompat             : "androidx.appcompat:appcompat:1.0.0",
+            arouterApi            : "com.alibaba:arouter-api:1.5.0",
+            arouterCompiler       : "com.alibaba:arouter-compiler:1.2.2",
+            butterknife           : "com.jakewharton:butterknife:$rootProject.butterknife_version",
+            butterknifeCompiler   : "com.jakewharton:butterknife-compiler:$rootProject.butterknife_version",
+```
+
+
+
+### 8、RxJava RxAndroid
+
+[给 Android 开发者的 RxJava 详解](https://gank.io/post/560e15be2dca930e00da1083#toc_31)
+
+[RxJava 沉思录（一）：你认为 RxJava 真的好用吗？](https://juejin.cn/post/6844903670203547656)
+
+
+
+#### 8.1 定义
+
+​		RxAndroid是RxJava在Android上的一个扩展，大牛JakeWharton的项目。据说和Retorfit、OkHttp组合起来使用，效果不是一般的好。而且用它似乎可以**完全替代eventBus**和OTTO。
+
+​		Rx(Reactive Extensions)是一个库，用来**处理事件和异步任务**，在很多语言上都有实现，RxJava是Rx在Java上的实现。简单来说，RxJava就是处理异步的一个库，最基本是基于观察者模式来实现的。通过Obserable和Observer的机制，实现所谓**响应式的编程**体验。
+　　Android的童鞋都知道，处理**异步事件**，现有的AsyncTask、**Handler**，不错的第三方事件总线EventBus、OTTO等等都可以处理。
+
+​		最概括的两个字：**简洁**。而且当业务越繁琐越复杂时这一点就越显出优势——它能够保持简洁。它提供的各种功能强悍的操作符真的很强大。
+
+
+
+#### 8.2 Observable：被观察者
+
+**创建**（除了create方法外，还有just()和from()方法也可以创建Observable对象）：
+
+```java
+Observable<String> mObservable = Observable.create(new Observable.OnSubscribe<String>() {
+            @Override
+            public void call(Subscriber<? super String> subscriber) {
+
+            }
+}); 
+```
+
+
+
+#### 8.3 Subsriber：订阅者
+
+```java
+Subscriber<String> mTestSubscriber = new Subscriber<String>() {
+            @Override
+            public void onCompleted() {
+            }
+            @Override
+            public void onError(Throwable e) {
+            }
+            @Override
+            public void onNext(String s) {
+            }
+}; 
+```
+
+
+
+#### 8.4 Observer：观察者
+
+Observer是一个接口，而Subscriber是它的一个抽象实现类。
+
+public interface Observer<T> {}
+
+public abstract class Subscriber<T> implements Observer<T>, Subscription {}
+
+```java
+Observer<String> mTestObsever = new Observer<String>() {
+            @Override
+            public void onCompleted() { 
+         } 
+​        @Override
+​        public void onError(Throwable e) { 
+​        } 
+​        @Override
+​        public void onNext(String s) { 
+​        }
+​    };
+```
+
+#### 8.5关联
+
+```java
+mObservable.subscribe(mTestSubscriber);
+//or
+mTestSubscriber.subscribe(mObservable);
+```
+
+
+
+
 
 
 
