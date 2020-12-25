@@ -463,9 +463,41 @@ mTestSubscriber.subscribe(mObservable);
 
 
 
+### 9、**UI线程才能更新UI？** 
+
+[Android UI 线程更新UI也会崩溃？？？](https://juejin.cn/post/6844904131962880008)
+
+```java
+void checkThread() {
+    if (mThread != Thread.currentThread()) {
+        throw new CalledFromWrongThreadException(
+                "Only the original thread that created a view hierarchy can touch its views.");
+    }
+}
+```
+
+Only the original thread that created a view hierarchy can touch its views.
+只有创建了视图层次结构的原始线程才能接触到它的视图
+
+- 哪个现场创建的view，就只能在当前view显示更新等。
+
+- 通常我们的ui都是在主线程中创建，所以才说UI线程更新ui。如果ui在子线程中创建，则...
+
+- 如果跨线程通信，可借助handler。
+
+
+
+### 10、recycleView从0到1
+
+[【Android】自定义无限循环的LayoutManager](https://juejin.cn/post/6909363022980972552)
 
 
 
 
 
+
+
+### 11、Android相关基础
+
+[Android的自定义View-基础知识-坐标系](https://juejin.cn/post/6909347047887880199)
 
