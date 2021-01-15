@@ -283,7 +283,20 @@ dependencies {
 
 
 
-### 7、gradle打包及自定义config.gradle/xx.properties
+### 7、gradle打包及自定义config.gradle/xx.properties-阿里云镜像
+
+
+
+```groovy
+repositories {
+    //阿里云的镜像库
+    maven {
+        url "http://maven.aliyun.com/nexus/content/groups/public/"
+    }
+    jcenter()
+    google()
+}
+```
 
 
 
@@ -500,4 +513,63 @@ Only the original thread that created a view hierarchy can touch its views.
 ### 11、Android相关基础
 
 [Android的自定义View-基础知识-坐标系](https://juejin.cn/post/6909347047887880199)
+
+
+
+
+
+### 12、Android优化
+
+#### 12.1 ui优化
+
+ **xml布局优化** 
+
+在写xml布局文件的时候，我们要做的也有很多，比如： 
+- 减少布局嵌套。多使用ViewStub、Merge、ConstraintLayout来代替。
+- 优化开销。RelativeLayout和 使用weight的LinearLayout 开销比较大，建议使用ConstraintLayout，LinearLayout代替。
+
+ViewStub：延迟加载
+
+Merge： 取消层级
+
+#### 12.2 屏幕适配
+
+```java
+public static float applyDimension(int unit, float value,
+                                       DisplayMetrics metrics)
+    {
+        switch (unit) {
+        case COMPLEX_UNIT_PX:
+            return value;
+        case COMPLEX_UNIT_DIP:
+            //公式 dp = px / density
+            return value * metrics.density;
+        case COMPLEX_UNIT_SP:
+            return value * metrics.scaledDensity;
+        case COMPLEX_UNIT_PT:
+            return value * metrics.xdpi * (1.0f/72);
+        case COMPLEX_UNIT_IN:
+            return value * metrics.xdpi;
+        case COMPLEX_UNIT_MM:
+            return value * metrics.xdpi * (1.0f/25.4f);
+        }
+        return 0;
+    }
+```
+
+https://segmentfault.com/a/1190000016079558
+
+不管你在布局文件中填写的是什么单位，最后都会被转化为 **px**。
+
+`今日头条适配方案`默认项目中只能 **以高或宽** 中的一个作为**基准**。
+
+
+
+
+
+
+
+### 13、MVC/MVP/MVVM
+
+https://mp.weixin.qq.com/s/h2i_17ChO9JsJvxq8tXwlA
 
