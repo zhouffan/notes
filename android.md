@@ -400,11 +400,41 @@ ext {
 
 
 
+`View` 是被观察者， `OnClickListener` 是观察者，二者通过 `setOnClickListener()` 方法达成订阅关系。
+
+`Observable` (可观察者，即被观察者)
+
+`Observer` (观察者)
+
+`subscribe` (订阅)
+
+事件
+
+**在不指定线程的情况下， RxJava 遵循的是线程不变的原则**，即：在哪个线程调用 `subscribe()`，就在哪个线程生产事件；在哪个线程生产事件，就在哪个线程消费事件。如果需要切换线程，就需要用到 `Scheduler` （**调度器**）。
+
+- `Schedulers.immediate()`: 直接在当前线程运行，相当于不指定线程。这是默认的 `Scheduler`。
+- `Schedulers.newThread()`: 总是启用新线程，并在新线程执行操作。
+- `Schedulers.io()`: I/O 操作（读写文件、读写数据库、网络信息交互等）所使用的 `Scheduler`。行为模式和 `newThread()` 差不多，区别在于 `io()` 的内部实现是是用一个无数量上限的线程池，可以重用空闲的线程，因此多数情况下 `io()` 比 `newThread()` 更有效率。不要把计算工作放在 `io()` 中，可以避免创建不必要的线程。
+- `Schedulers.computation()`: 计算所使用的 `Scheduler`。这个计算指的是 CPU 密集型计算，即不会被 I/O 等操作限制性能的操作，例如图形的计算。这个 `Scheduler` 使用的固定的线程池，大小为 CPU 核数。不要把 I/O 操作放在 `computation()` 中，否则 I/O 操作的等待时间会浪费 CPU。
+- 另外， Android 还有一个专用的 `AndroidSchedulers.mainThread()`，它指定的操作将在 Android 主线程运行。
+
+**subscribeOn(...)**: `Observable.OnSubscribe` 被激活时所处的线程。或者叫做**事件产生的线程**。
+
+**observeOn(...)**: 指定 `Subscriber` 所运行在的线程(回调在哪个线程中)。或者叫做**事件消费的线程**
+
+
+
+**变换，就是将事件序列中的对象或整个序列进行加工处理，转换成不同的事件或事件序列。**
+
+flat   flatmap
+
+
+
 #### 8.1 定义
 
 ​		RxAndroid是RxJava在Android上的一个扩展，大牛JakeWharton的项目。据说和Retorfit、OkHttp组合起来使用，效果不是一般的好。而且用它似乎可以**完全替代eventBus**和OTTO。
 
-​		Rx(Reactive Extensions)是一个库，用来**处理事件和异步任务**，在很多语言上都有实现，RxJava是Rx在Java上的实现。简单来说，RxJava就是处理异步的一个库，最基本是基于观察者模式来实现的。通过Obserable和Observer的机制，实现所谓**响应式的编程**体验。
+​		Rx(Reactive Extensions)是一个库，用来**处理事件和异步任务**，在很多语言上都有实现，RxJava是Rx在Java上的实现。简单来说，RxJava就是处理异步的一个库，最基本是基于观察者模式来实现的。通过Obserable和Observer的机制，实现所谓**响应式的编程**体验。subscribeOn
 　　Android的童鞋都知道，处理**异步事件**，现有的AsyncTask、**Handler**，不错的第三方事件总线EventBus、OTTO等等都可以处理。
 
 ​		最概括的两个字：**简洁**。而且当业务越繁琐越复杂时这一点就越显出优势——它能够保持简洁。它提供的各种功能强悍的操作符真的很强大。
@@ -474,6 +504,12 @@ mObservable.subscribe(mTestSubscriber);
 mTestSubscriber.subscribe(mObservable);
 ```
 
+**1、subscribeOn(Schedulers.io())  指定observable的 subscribeOn() 方法在后台线程运行。**
+
+**2、observeOn(AndroidSchedulers.mainThread()) 指定 observer 的回调方法在主线程运行。**
+
+
+
 
 
 ### 9、**UI线程才能更新UI？** 
@@ -493,9 +529,7 @@ Only the original thread that created a view hierarchy can touch its views.
 只有创建了视图层次结构的原始线程才能接触到它的视图
 
 - 哪个现场创建的view，就只能在当前view显示更新等。
-
 - 通常我们的ui都是在主线程中创建，所以才说UI线程更新ui。如果ui在子线程中创建，则...
-
 - 如果跨线程通信，可借助handler。
 
 
