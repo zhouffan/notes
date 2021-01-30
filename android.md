@@ -122,7 +122,17 @@ public class ActivityJnject extends AppCompatActivity {
 
 [官网](https://square.github.io/retrofit/)
 
-[Android：手把手带你 深入读懂 Retrofit 2.0 源码](https://www.jianshu.com/p/0c055ad46b6c)     ************
+[Android：手把手带你 深入读懂 Retrofit 2.0 源码](https://www.jianshu.com/p/0c055ad46b6c)     
+
+**Retrofit的Url组合规则**
+
+| BaseUrl                              | 和URL有关的注解中提供的值 | 最后结果                                 |
+| ------------------------------------ | ------------------------- | ---------------------------------------- |
+| http://localhost:4567/path/to/other/ | /post                     | http://localhost:4567/post               |
+| http://localhost:4567/path/to/other/ | post                      | http://localhost:4567/path/to/other/post |
+| http://localhost:4567/path/to/other/ | https://github.com/ikidou | https://github.com/ikidou                |
+
+
 
 ![img](https://upload-images.jianshu.io/upload_images/21236288-d35bc5858893bd41.png?imageMogr2/auto-orient/strip|imageView2/2/w/1106/format/webp)
 
@@ -536,6 +546,14 @@ Only the original thread that created a view hierarchy can touch its views.
 
 ### 10、recycleView从0到1
 
+
+
+https://mp.weixin.qq.com/s/auphzaQF6_wJx6dGFY6niA : RecyclerView 有五虎上将
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/v1LbPPWiaSt4iciasKiaPrFk69TMxh9DB0h55icAiciaoSlORib0U0FYWNRLZk5SZQQQxdMgZDW4D2NDThxD9aGVsE8UUw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+
+
+
 [【Android】自定义无限循环的LayoutManager](https://juejin.cn/post/6909363022980972552)
 
 
@@ -606,4 +624,44 @@ https://segmentfault.com/a/1190000016079558
 ### 13、MVC/MVP/MVVM
 
 https://mp.weixin.qq.com/s/h2i_17ChO9JsJvxq8tXwlA
+
+
+
+
+
+### 14、ViewPager2
+
+与ViewPager相比，包括但不限于下列几点：
+
+ 1、不但支持水平方向翻页，还支持垂直方向翻页；
+
+ 2、支持RecyclerView.Adapter，允许调用适配器对象的notifyItem***方法，从而动态刷新某项视图；
+
+ 3、除了当前页，也支持展示左右两页的部分区域； 
+
+4、支持在翻页过程中展示自定义的切换动画；
+
+基础使用：https://cloud.tencent.com/developer/article/1650816
+
+```java
+implementation 'androidx.recyclerview:recyclerview:1.1.0'
+implementation 'androidx.viewpager2:viewpager2:1.0.0'
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <!-- 标签布局TabLayout节点需要使用完整路径 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <!-- 二代翻页视图ViewPager2节点也需要使用完整路径 -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vp2_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
+```
 

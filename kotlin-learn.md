@@ -6,6 +6,212 @@
 
 
 
+https://kaixue.io/author/rengwuxian/ 
+
+```kotlin
+//var 是 variable 的缩写， val 是 value 的缩写
+--------------分割线----------------------------
+//java的Object变成kotlin的Any
+//kotlin中的object（小写）：创建一个类对象， 将class换成object
+// 👇 class 替换成了 object
+object A {
+    val number: Int = 1
+    fun method() {
+        println("A.method()")
+    }
+} 
+//调用
+A.number/ A.method()
+--------------分割线----------------------------
+//匿名类， 将new 换成object
+val listener = object: ViewPager.SimpleOnPageChangeListener() {
+    override fun onPageSelected(position: Int) {
+        // override
+    }
+}  
+--------------分割线----------------------------
+//companion 可以理解为伴随、伴生，表示修饰的对象和外部类绑定
+class Sample { 
+       👇
+    companion object {
+        val anotherString = "Another String"
+    }
+    companion object B { //companion 修饰时,B可以省略
+        var c: Int = 0
+    }
+}
+//调用
+A.B.c
+===> A.c // 👈 B 没了
+--------------分割线----------------------------
+//Kotlin 的常量必须声明在对象（包括伴生对象）或者「top-level 顶层」中，因为常量是静态的。
+//Kotlin 新增了修饰常量的 const 关键字。
+class Sample {
+    companion object {
+         👇                  // 👇
+        const val CONST_NUMBER = 1
+    }
+} 
+const val CONST_SECOND_NUMBER = 2
+--------------分割线----------------------------
+//toMutable*() 返回的是一个新建的集合，原有的集合还是不可变的，所以只能对函数返回的集合修改。
+val strList = listOf("a", "b", "c")
+            👇
+strList.toMutableList()
+val strSet = setOf("a", "b", "c")
+            👇
+strSet.toMutableSet()
+val map = mapOf("key1" to 1, "key2" to 2, "key3" to 3, "key4" to 3)
+         👇
+map.toMutableMap()
+--------------分割线----------------------------
+//java   达到「钩子」的效果
+public class User {
+    String name;
+    public String getName() {
+        return this.name + " nb";
+    }
+    public void setName(String name) {
+        this.name = "Cute " + name;
+    }
+}
+//kotlin
+class User {
+    var name = "Mike" 
+        get() {
+            return field + " nb"
+        } 
+        set(value) {
+            field = "Cute " + value
+        }
+}
+// 类中的变量
+class Kotlin {
+  var name = "kaixue.io"
+}
+//等价于java代码
+public final class Kotlin {
+   @NotNull
+   private String name = "kaixue.io"; 
+   @NotNull
+   public final String getName() {
+      return this.name;
+   } 
+   public final void setName(@NotNull String name) {
+      this.name = name;
+   }
+}
+// val 定义的变量， get时依然可以修改
+val name = "Mike"
+get() {
+   return field + " nb"
+}
+
+--------------分割线----------------------------
+fun main() {
+    var activity: Activity = NewActivity()
+    if (activity is NewActivity) {
+        // 👇的强转由于类型推断被省略了
+        activity.action()
+    }
+}
+fun main() {
+    var activity: Activity = NewActivity()
+    // 👇'(activity as? NewActivity)' 之后是一个可空类型的对象，所以，需要使用 '?.' 来调用
+    (activity as? NewActivity)?.action()
+}
+
+--------------分割线----------------------------
+//调用
+class User constructor(var name: String) {
+                                   // 👇  👇 直接调用主构造器
+    constructor(name: String, id: Int) : this(name) {
+    }
+                                                // 👇 通过上一个次构造器，间接调用主构造器
+    constructor(name: String, id: Int, age: Int) : this(name, id) {
+    }
+}
+//主构造器被修饰为私有
+class User private constructor(name: String) {
+//           👆 主构造器被修饰为私有的，外部就无法调用该构造器
+}
+//
+class User(var name: String) {
+}
+//====》 等价于：
+class User(name: String) {
+  var name: String = name
+}
+
+--------------分割线----------------------------函数嵌套
+fun login(user: String, password: String, illegalStr: String) {
+    // 验证 user 是否为空
+    if (user.isEmpty()) {
+        throw IllegalArgumentException(illegalStr)
+    }
+    // 验证 password 是否为空
+    if (password.isEmpty()) {
+        throw IllegalArgumentException(illegalStr)
+    }
+}
+//====> 等价
+fun login(user: String, password: String, illegalStr: String) {
+    fun validate(value: String) {
+        if (value.isEmpty()) {                   👇
+            throw IllegalArgumentException(illegalStr)
+        }
+    }
+    validate(user)
+    validate(password)
+}
+// Kotlin 内置的 require 函数
+fun login(user: String, password: String, illegalStr: String) {
+    require(user.isNotEmpty()) { illegalStr }
+    require(password.isNotEmpty()) { illegalStr }
+}
+
+--------------分割线----------------------------
+when (x) { 
+    1, 2 -> print("x == 1 or x == 2")
+    in 1..10 -> print("x 在区间 1..10 中") 
+    in listOf(1,2) -> print("x 在集合中")
+    // not in
+    !in 10..20 -> print("x 不在区间 10..20 中")
+    is String -> true
+    else -> print("else")
+}
+when { 
+    str1.contains("a") -> print("字符串 str1 包含 a") 
+    str2.length == 3 -> print("字符串 str2 的长度为 3")
+}
+--------------分割线----------------------------
+
+
+--------------分割线----------------------------
+
+
+--------------分割线----------------------------
+
+--------------分割线----------------------------
+
+--------------分割线----------------------------
+
+
+--------------分割线----------------------------
+
+
+--------------分割线----------------------------
+
+
+--------------分割线----------------------------
+
+
+--------------分割线----------------------------
+
+--------------分割线----------------------------
+
+```
+
 
 
 ### 2. kotlin常用函数
@@ -381,6 +587,227 @@ var a2 = a?.b?.c?.d
 
 
 
+
+### 4 泛型 in /out 
+
+https://kaixue.io/kotlin-generics/
+
+- `? extends` 叫做「上界通配符」，可以使 Java 泛型具有「协变性 Covariance」
+
+- `? super` 叫做「下界通配符」，可以使 Java 泛型具有「逆变性 Contravariance」
+
+- 可以使用泛型通配符 `? extends` 来使泛型支持协变，但是「只能读取不能修改」，这里的修改仅指对泛型集合添加元素，如果是 `remove(int index)` 以及 `clear` 当然是可以的。
+
+  ```java
+  List<? extends TextView> textViews = new ArrayList<Button>();
+  TextView textView = textViews.get(0); // 👈 get 可以
+  textViews.add(textView);
+  //             👆 add 会报错，no suitable method found for add(TextView)
+  ```
+
+- 可以使用泛型通配符 `? super` 来使泛型支持逆变，但是「只能修改不能读取」，这里说的不能读取是指不能按照泛型类型读取，你如果按照 `Object` 读出来再强转当然也是可以的。
+
+  ```javascript
+  List<? super Button> buttons = new ArrayList<TextView>();
+  Object object = buttons.get(0); // 👈 get 出来的是 Object 类型
+  Button button = ...
+  buttons.add(button); // 👈 add 操作是可以的
+  ```
+
+- 使用关键字 `out` 来支持协变，等同于 Java 中的上界通配符 `? extends`。
+
+- 使用关键字 `in` 来支持逆变，等同于 Java 中的下界通配符 `? super`。
+
+- **`out`** 表示，我这个变量或者参数**只用来输出**，不用来输入，你只能读我不能写我；**`in`** 就反过来，表示它**只用来输入**，不用来输出，你只能写我不能读我。
+
+```java
+🏝️             👇
+class Producer<out T> {
+    fun produce(): T {
+        ...
+    }
+}
+
+val producer: Producer<TextView> = Producer<Button>() // 👈 这里不写 out 也不会报错
+val producer: Producer<out TextView> = Producer<Button>() // 👈 out 可以但没必要
+---------------------------------------------------
+🏝️            👇
+class Consumer<in T> {
+    fun consume(t: T) {
+        ...
+    }
+}
+
+val consumer: Consumer<Button> = Consumer<TextView>() // 👈 这里不写 in 也不会报错
+val consumer: Consumer<in Button> = Consumer<TextView>() // 👈 in 可以但没必要
+------------------------------------------------------- ?
+//Java 中单个 ? 号也能作为泛型通配符使用，相当于 ? extends Object。
+//它在 Kotlin 中有等效的写法：* 号，相当于 out Any。
+------------------------------------------------------- where
+//extends多个父
+class Monster<T extends Animal & Food>{ 
+}
+//where 多个父
+🏝️                👇
+class Monster<T> where T : Animal, T : Food
+------------------------------------------------------- reified
+//Java 中的泛型存在类型擦除的情况，任何在运行时需要知道泛型确切类型信息的操作都没法用了
+//java
+<T> void test(Object item) {
+    if (item instanceof T) { // 👈 IDE 会提示错误，illegal generic type for instanceof
+        System.out.println(item);
+    }
+}
+//=====>解决   额外传递一个 Class<T> 类型的参数
+<T> void test(Object item, Class<T> type) {
+    if (type.isInstance(item)) { 
+        System.out.println(item);
+    }
+}
+//kotlin
+fun <T> test(item: Any) {
+    if (item is T) { // 👈 IDE 会提示错误，Cannot check for instance of erased type: T
+        println(item)
+    }
+}
+//=====>解决    inline/reified泛型实化
+inline fun <reified T> test(item: Any) {
+    if (item is T) { // 👈 这里就不会在提示错误了
+        println(item)
+    }
+}
+
+```
+
+
+
+### 5 协程
+
+ https://blog.csdn.net/qq_39969226/article/details/101058033
+
+https://kaixue.io/kotlin-coroutines-1/
+
+1.协程是什么？
+线程框架。【更方便】
+
+协程就是launch里面的代码。
+
+2.挂起谁？
+挂起协程。
+
+launch创建的协程在执行到某一个suspend函数挂起函数的时候，这个协程会被suspend（被挂起）
+
+3.从哪儿挂起？
+从当前线程挂起。
+
+这个协程从正在执行它的线程上脱离了。不是这个协程停下来了而是协程所在的线程从这行代码开始不再运行这个协程了。
+
+线程和协程分2波走了。
+
+
+
+- 协程在执行到有supend标记的函数的时候会被挂起，**<u>挂起和开启一个协程一样</u>**，就是**<u>切</u>**个线程。只不过挂起函数在执行完毕之后协程会自动的<u>**重新切回它原先的那个线程**</u>。挂起就是一个稍后会被自动切回来的线程切换。
+
+
+
+```kotlin
+// 方法一，使用 runBlocking 顶层函数
+// 方法一通常适用于单元测试的场景，而业务开发中不会用到这种方法，因为它是线程阻塞的。
+runBlocking {
+    getImage(imageId)
+}
+
+// 方法二，使用 GlobalScope 单例对象
+// 方法二和使用 runBlocking 的区别在于不会阻塞线程。但在 Android 开发中同样不推荐这种用法，因为它的生命周期会和 app 一致，且不能取消
+//            👇 可以直接调用 launch 开启协程
+GlobalScope.launch {
+    getImage(imageId)
+}
+
+// 方法三，自行通过 CoroutineContext 创建一个 CoroutineScope 对象
+// 方法三是比较推荐的使用方法，我们可以通过 context 参数去管理和控制协程的生命周期（这里的 context 和 Android 里的不是一个东西，是一个更通用的概念，会有一个 Android 平台的封装来配合使用）。
+//                                    👇 需要一个类型为 CoroutineContext 的参数
+val coroutineScope = CoroutineScope(context)
+coroutineScope.launch {
+    getImage(imageId)
+}
+//---------------------分割线------------------------------------
+// 同时请求多个地址
+coroutineScope.launch(Dispatchers.Main) {
+    //            👇  async 函数之后再讲
+    val avatar = async { api.getAvatar(user) }    // 获取用户头像
+    val logo = async { api.getCompanyLogo(user) } // 获取用户所在公司的 logo
+    val merged = suspendingMerge(avatar, logo)    // 合并结果
+    //                  👆
+    show(merged) // 更新 UI
+}
+//---------------------分割线------------------------------------
+// 协程切换-----withContext:自动把线程切回去继续执行
+coroutineScope.launch(Dispatchers.Main) {      // 👈 在 UI 线程开始
+    val image = withContext(Dispatchers.IO) {  // 👈 切换到 IO 线程，并在执行完成后切回 UI 线程
+        getImage(imageId)                      // 👈 将会运行在 IO 线程
+    }
+    avatarIv.setImageBitmap(image)             // 👈 回到 UI 线程更新 UI
+} 
+//---------------------分割线------------------------------------
+// 「用同步的方式写异步的代码」-----自动切换线程
+launch(Dispatchers.Main) {              // 👈 在 UI 线程开始
+    val image = getImage(imageId)
+    avatarIv.setImageBitmap(image)     // 👈 执行结束后，自动切换回 UI 线程
+}
+//                               👇
+suspend fun getImage(imageId: Int) = withContext(Dispatchers.IO) {
+    ...
+}
+
+//---------------------分割线------------------------------------
+// Deferred ：延迟； 调用 Deferred.await() 得到结果
+coroutineScope.launch(Dispatchers.Main) {
+    //                      👇  async 函数启动新的协程
+    val avatar: Deferred = async { api.getAvatar(user) }    // 获取用户头像
+    val logo: Deferred = async { api.getCompanyLogo(user) } // 获取用户所在公司的 logo
+    //            👇          👇 获取返回值
+    show(avatar.await(), logo.await())                     // 更新 UI
+}
+
+//suspend 函数
+//要求 suspend 函数只能在协程里或者另一个 suspend 函数里被调用，是为了要让协程能够在 suspend 函数切换线程之后再切回来.
+//=========================
+//通过 withContext 源码可以知道，它本身就是一个挂起函数，它接收一个 Dispatcher 参数，依赖这个 Dispatcher 参数的指示，你的协程被挂起，然后切到别的线程。
+//所以这个 suspend，其实并不是起到把任何把协程挂起，或者说切换线程的作用。
+//真正挂起协程这件事，是 Kotlin 的协程框架帮我们做的。
+//所以我们想要自己写一个挂起函数，仅仅只加上 suspend 关键字是不行的，还需要函数内部直接或间接地调用到 Kotlin 协程框架自带的 suspend 函数才行。
+
+===>总结：切换线程需要调用系统的 挂起函数（如 withContext、 delay）
+//---------------------分割线------------------------------------
+//什么时候需要自定义 suspend 函数=======>如果你的某个函数比较耗时，也就是要等的操作，那就把它写成 suspend 函数。这就是原则。
+//具体该怎么写===========>给函数加上 suspend 关键字，然后在 withContext 把函数的内容包住就可以了。（withContext：把线程自动切走和切回。）
+
+
+协程就是切线程；
+挂起就是可以自动切回来的切线程；
+挂起的非阻塞式指的是它能用看起来阻塞的代码写出非阻塞的操作
+```
+
+
+
+
+
+
+
+
+
+
+
+### 6 空字符串判断
+
+| 値       | isEmpty  | isNotEmpty | isNullOrEmpty | isBlank  | isNotBlank | isNullOrBlank | orEmpty  |
+| :------- | :------- | :--------- | :------------ | :------- | :--------- | :------------ | :------- |
+| var=""   | **true** | *false*    | **true**      | **true** | *false*    | **true**      | 空文字列 |
+| var=" "  | *false*  | **true**   | *false*       | **true** | *false*    | **true**      | スペース |
+| var=null | *Error*  | *Error*    | **true**      | *Error*  | *Error*    | **true**      | 空文字列 |
+| var="1"  | *false*  | **true**   | *false*       | *false*  | **true**   | *false*       | 1        |
+| var="0"  | *false*  | **true**   | *false*       | *false*  | **true**   | *false*       | 0        |
 
 
 
