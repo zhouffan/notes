@@ -120,13 +120,13 @@ eg：personList.stream()
 
 
 
-### 2. Optional
+### 2、 Optional
 
 
 
 
 
-### 3.contentType
+### 3、contentType
 
 Internet Media Type即互联网媒体类型，也叫做MIME类型，使用两部分标识符来确定一个类型。
 
@@ -189,6 +189,194 @@ Internet Media Type即互联网媒体类型，也叫做MIME类型，使用两部
  	return "md5";
 }
 ```
+
+### 4、线程池
+
+[Java线程池的内部原理](https://blog.csdn.net/heihaozi/article/details/102882698?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase)
+
+![img](https://img-blog.csdnimg.cn/20191103152757811.jpg#pic_center)
+
+
+
+
+
+
+
+### 5、自定义注解
+
+[Java实现自定义注解](https://blog.csdn.net/zt15732625878/article/details/100061528)
+
+[Java 自定义注解及使用场景](https://www.jianshu.com/p/a7bedc771204)
+
+```java
+@Target({ElementType.FIELD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Info {
+      String value() default "tracy";
+      boolean isDelete();
+}
+
+@Data
+@Builder
+// 为Person类配置了刚刚定义的注解@Info
+@Info(isDelete = true)
+public class Person { 
+    /**
+     * 姓名
+     */
+    private String name; 
+}
+
+public class AnnotationTest {
+    public static void main(String[] args) {
+        try {
+            //获取Person的Class对象
+            Person person = Person.builder().build();
+            Class clazz = person.getClass();
+            //判断person对象上是否有Info注解
+            if (clazz.isAnnotationPresent(Info.class)) {
+                System.out.println("Person类上配置了Info注解！");
+                //获取该对象上Info类型的注解
+                Info infoAnno = (Info) clazz.getAnnotation(Info.class);
+                System.out.println("person.name :" + infoAnno.value() + ",person.isDelete:" + infoAnno.isDelete());
+            } else {
+                System.out.println("Person类上没有配置Info注解！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+**反射是否真的会让你的程序性能降低?**
+
+1.反射大概比直接调用慢50~100倍，但是需要你在执行100万遍的时候才会有所感觉
+2.判断一个函数的性能，你需要把这个函数执行100万遍甚至1000万遍
+3.如果你只是偶尔调用一下反射，请忘记反射带来的性能影响
+4.如果你需要大量调用反射，请考虑缓存。
+5.你的编程的思想才是限制你程序性能的最主要的因素
+
+
+
+
+
+### 6、链式写法
+
+```java
+public class MyBuilder {
+    private String username;
+    private String password;
+    public static MyBuilder builder(){
+        return new MyBuilder();
+    }
+    public String getUsername() {
+        return username;
+    }
+    public MyBuilder setUsername(String username) {
+        this.username = username;
+        return this;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public MyBuilder setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+    public static void main(String[] args) {
+        MyBuilder myBuilder = MyBuilder.builder()
+                    .setPassword("1")
+                    .setPassword("1");
+    }
+}
+// 自带get、set 不改变
+public class MyBuilder2 {
+    private String username;
+    private String password;
+    //自带get、set 不改变
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    //与builder参数关联
+    public MyBuilder2(Builder builder) {
+        this.username = builder.username;
+        this.password = builder.password;
+    }
+    //构建内部类
+    public static Builder builder(){
+        return new Builder();
+    }
+    //******扩展创建对象******
+    public static class Builder{
+    private String username;
+    private String password;
+    public String getUsername() {
+        return username;
+    }
+    public Builder setUsername(String username) {
+        this.username = username;
+        return this;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public Builder setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+    public MyBuilder2 build(){
+        return new MyBuilder2(this);
+    }
+    }
+    @Override
+    public String toString() {
+        return "MyBuilder2{" +
+        "username='" + username + '\'' +
+        ", password='" + password + '\'' +
+        '}';
+    }
+    public static void main(String[] args) {
+        // MyBuilder2 build1 = new MyBuilder2.Builder().setPassword("").setPassword("").build();
+        MyBuilder2 build = MyBuilder2.builder() //构建内部类
+        .setPassword("1") //设置内部类对象的值
+        .setUsername("2")//设置内部类对象的值
+        .build(); //创建外部实体类，并将内部类对象传给实体类
+        System.out.print(build);
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -124,6 +124,10 @@ public class ActivityJnject extends AppCompatActivity {
 
 [Android：手把手带你 深入读懂 Retrofit 2.0 源码](https://www.jianshu.com/p/0c055ad46b6c)     
 
+https://www.jianshu.com/p/360768def285
+
+
+
 **Retrofit的Url组合规则**
 
 | BaseUrl                              | 和URL有关的注解中提供的值 | 最后结果                                 |
@@ -558,6 +562,10 @@ https://mp.weixin.qq.com/s/auphzaQF6_wJx6dGFY6niA : RecyclerView 有五虎上将
 
 
 
+[如何实现 RecyclerView 的刷新分页](https://mp.weixin.qq.com/s/t1qiAggzR0MgxJXTB9mBAw)
+
+
+
 
 
 
@@ -570,7 +578,7 @@ https://mp.weixin.qq.com/s/auphzaQF6_wJx6dGFY6niA : RecyclerView 有五虎上将
 
 
 
-### 12、Android优化
+### 12、UI适配
 
 #### 12.1 ui优化
 
@@ -585,6 +593,14 @@ ViewStub：延迟加载
 Merge： 取消层级
 
 #### 12.2 屏幕适配
+
+[骚年你的屏幕适配方式该升级了!-今日头条适配方案](https://segmentfault.com/a/1190000016079558)
+
+[Android 目前稳定高效的UI适配方案](https://mp.weixin.qq.com/s/X-aL2vb4uEhqnLzU5wjc4Q)
+
+
+
+
 
 ```java
 public static float applyDimension(int unit, float value,
@@ -627,7 +643,7 @@ https://mp.weixin.qq.com/s/h2i_17ChO9JsJvxq8tXwlA
 
 
 
-
+![Jetpack MVVM 架构](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4fdef6223d184a1284479669b059f241~tplv-k3u1fbpfcp-watermark.image)
 
 ### 14、ViewPager2
 
@@ -665,3 +681,173 @@ implementation 'androidx.viewpager2:viewpager2:1.0.0'
 </LinearLayout>
 ```
 
+
+
+
+
+### 15、内存调优
+
+[深入内存优化](https://www.jianshu.com/p/a38bfaaa9fac)
+
+
+
+
+
+
+
+### 16、Bitmap位图OOM
+
+[Bitmap之位图采样和内存计算详解](https://mp.weixin.qq.com/s/vv7M5knOqF3YIx-NxD5D4g)
+
+使用 bitmap.getConfig() 获取 Bitmap 的格式，这里是 **ARGB_8888** ，这种 Bitmap 格式下**一个像素点占 4 个字节**，所以要 x 4
+
+drawable-**xxhdpi** 所代表的 density 为 **480**(density)，我的手机屏幕所代表的 density 是 480(targetDensity)
+
+
+
+如下可以解释图片放在drawable-xxhdpi的密度越低的里面，加载图片越容易出现OOM，因为计算出来的图片大小越大。
+
+```java
+//targetDensity 手机固定的密度
+scale = targetDensity / density
+widthPix = originalWidth * scale
+heightPix = orignalHeight * scale
+Bitmap Memory = widthPix * scale * heightPix * scale * 4
+    
+//先采样然后计算采样后的内存，这里指定 inSampleSize 为200
+inSampleSize = 200
+scale = targetDensity / density = 480 / 480 = 1
+widthPix = orignalScale * scale = 6000 / 200 * 1 = 30 
+heightPix = orignalHeight * scale = 4000 / 200 * 1 = 20
+Bitmap Memory =  widthPix * heightPix * 4
+= 30 * 20 * 4 = 2400(Byte)
+//---------------分割线-----xhdpi会成倍增加------------------------
+//如果放在 drawable-xhdpi， density为 320
+inSampleSize = 200
+scale = targetDensity / density = 480 / 320
+widthPix = orignalWidth * scale = 6000 / 200 * scale = 45
+heightPix = orignalHeight * scale = 4000 / 200 * 480 / 320 = 30
+Bitmap Memory =  widthPix * scale * heightPix * scale * 4
+= 45 * 30 * 4 = 5400(Byte) 
+   
+//---------------分割线---------------------------------------
+//一张大图 6000 x 4000 ,图片接近 12M------xxhdpi，请求宽高为100x100
+inSampleSize = 4000 / 100 = 40
+scale = targetDensity / density = 480 / 480 = 1
+widthPix = orignalWidth * scale = 6000 / 40 * 1 = 150      
+heightPix = orignalHeight * scale = 4000 / 40 * 1 = 100
+BitmapMemory = widthPix * scale * heightPix * scale * 4 = 60000(Byte)
+```
+
+
+
+### 17、基础 
+
+
+
+#### 17.1 AppCompat
+
+[到底什么是AndroidX](https://blog.csdn.net/guolin_blog/article/details/97142065)
+
+appcompat-v7指的是将库中提供的API向下兼容至API 7，也就是Android 2.1系统.
+
+androidx:  对Android Support Library的一次升级。
+
+
+
+[AppCompatActivity](https://mp.weixin.qq.com/s/nHGZmzTAioVH9FYEqR1c9Q)
+
+其间接继承自Activity，之间还继承了其他Activity特色类,可以使得低版本上运行的Activity也能拥有ToolBar和暗黑主题等新功能。
+
+
+
+
+
+#### 17.2 事件分发
+
+安卓的事件分发大概会经历 Activity -> PhoneWindow -> DecorView -> ViewGroup -> View 的 dispatchTouchEvent
+
+https://juejin.cn/post/6874589638925746190
+
+1. 如何解决滑动冲突？
+
+- 通过重写父类的 onInterceptTouchEvent 来拦截滑动事件
+- 通过在子类中调用 parent.requestDisallowInterceptTouchEvent 来通知父类是否要拦截事件
+
+
+
+
+
+
+
+#### 17.3 View绘制
+
+[android 绘制流程之修改子View的绘制顺序](https://juejin.cn/post/6883323198918787080/)
+
+[ViewGroup 默认顺序绘制子 View，如何修改？什么场景需要修改绘制顺序？](https://blog.csdn.net/plokmju88/article/details/107399102)
+
+int getChildDrawingOrder（int childCount, int i）中
+
+i           ====> 代表的是绘制的顺序，**第几个** 
+
+返回值 ====> 代表 当前容器的 **第几个子View**。
+
+```java
+@Override
+protected int getChildDrawingOrder(int childCount, int i) {
+  View view = getLayoutManager().getFocusedChild();
+  if (null == view) {
+    return super.getChildDrawingOrder(childCount, i);
+  }
+  int position = indexOfChild(view);
+  if (position < 0) {
+    return super.getChildDrawingOrder(childCount, i);
+  }
+  //绘制顺序=====》跟最后一个互换
+  //当绘制最后一个 view顺序时，取position焦点view
+  if (i == childCount - 1) {
+    return position;
+  }
+  //当前绘制的这个 跟焦点view下标相同，取最后一个view
+  if (i == position) {
+    return childCount - 1;
+  }
+  return super.getChildDrawingOrder(childCount, i);
+}
+```
+
+
+
+
+
+
+
+[公共技术点之 View 绘制流程](https://a.codekk.com/detail/Android/lightSky/%E5%85%AC%E5%85%B1%E6%8A%80%E6%9C%AF%E7%82%B9%E4%B9%8B%20View%20%E7%BB%98%E5%88%B6%E6%B5%81%E7%A8%8B)
+
+![image-20210207142554320](D:\Desktop\notes\view-draw.png)
+
+#### 17.4 理解android:sharedUserId="android.uid.system"
+
+https://blog.csdn.net/u012398902/article/details/52735980
+
+​		通过Shared User id,拥有同一个User id的多个APK可以配置成运行在**同一个进程中**。那么把程序的UID配成android.uid.system，也就是要让程序运行在**系统进程**中，这样就有权限来修改系统时间了。 只是加入UID还不够，如果这时候安装APK的话发现无法安装，提示**签名不符**。
+
+**目的： 跟系统在同一个进程中**
+
+
+
+#### 17.4 异常
+
+[OutOfMemoryError 可以被 try catch 吗？](https://juejin.cn/post/6874916707543187463)
+
+![img](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bd1a8299be0041f086449e1f105842b1~tplv-k3u1fbpfcp-zoom-1.image)
+
+
+
+
+
+
+
+### 18、Jetpack
+
+[是让人耳目一新的 Jetpack MVVM 精讲](https://www.jianshu.com/p/85e528e8474b)

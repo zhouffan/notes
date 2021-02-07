@@ -28,3 +28,7 @@
 | adb shell ifconfig                                           | 查看设备的ip地址信息                                  |                                                              |
 | adb shell netcfg                                             | 查看设备的网络端口                                    |                                                              |
 | iptables -t nat -A PREROUTING -p tcp --dport 21 -j REDIRECT --to-port 2121 | 进行端口映射                                          | 将21端口映射到2121端口上                                     |
+
+
+
+dumpsys window | grep Focus
