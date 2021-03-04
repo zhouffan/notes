@@ -811,6 +811,151 @@ coroutineScope.launch(Dispatchers.Main) {
 
 
 
+### 7 by(委托) /lazy(内部首次执行，后面返回最后一行结果)
+
+https://blog.csdn.net/qq_40990280/article/details/107601024
+
+ **7.1 lazy：  lazy() 是一个**函数**, 接受一个 **Lambda 表达式作为参数**, 返回一个 Lazy <T> 实例的函数，返回的实例**可以作为实现延迟属性的委托**： `第一次`调用 get() 会执行已传递给 lazy() 的 lamda 表达式并记录结果， `后续`调用 get() **只**是**返回**记录的**结果**。 
+
+```kotlin
+val lazyValue: String by lazy {
+    println("computed!")     // 第一次调用输出，第二次调用不执行
+    "Hello"
+}
+
+fun main(args: Array<String>) {
+    println(lazyValue)   // 第一次执行，执行两次输出表达式
+    println(lazyValue)   // 第二次执行，只输出返回值
+}
+```
+
+
+
+**7.2 by：**委托 : 一种是`属性委托` 一种是`类委托`
+
+- 类委托
+
+  ```kotlin
+  interface Base {
+      fun printMessage()
+      fun printMessageLine()
+  } 
+  class BaseImpl(val x: Int) : Base {
+      override fun printMessage() { print(x) }
+      override fun printMessageLine() { println(x) }
+  } 
+  //类委托
+  class Derived(b: Base) : Base by b {
+      override fun printMessage() { print("abc") }
+  } 
+  fun main() {
+      val b = BaseImpl(10)
+      Derived(b).printMessage()
+      Derived(b).printMessageLine()
+  }
+  ```
+
+- 属性委托
+
+  ```kotlin
+  //by lazy  : 第一次使用时初始化
+  //lateinit : 一定非空         都是延迟获取
+  class Bean {
+      val str by lazy {
+          println("Init lazy")
+          "Hello World"
+      }
+  }
+  
+  fun main() {
+      val bean = Bean()
+      println("Init Bean")
+      println(bean.str)
+      println(bean.str)
+  }
+  
+  Init Bean
+  Init lazy
+  Hello World
+  Hello World
+  ```
+
+  
+
+### 8 reified  泛型实化
+
+```kotlin
+//----------------------1. 不再需要传参数 clazz
+// Function
+private fun <T : Activity> Activity.startActivity(context: Context, clazz: Class<T>) {
+    startActivity(Intent(context, clazz))
+} 
+// Caller
+startActivity(context, NewActivity::class.java)
+
+===> reified方式
+// Function
+inline fun <reified T : Activity> Activity.startActivity(context: Context) {
+    startActivity(Intent(context, T::class.java))
+} 
+// Caller
+startActivity<NewActivity>(context) 
+
+//----------------------2. 不安全的转换
+// Function
+fun <T> Bundle.getDataOrNull(): T? {
+    return getSerializable(DATA_KEY) as? T
+} 
+// Caller
+val bundle: Bundle? = Bundle()
+bundle?.putSerializable(DATA_KEY, "Testing")
+val strData: String? = bundle?.getDataOrNull()
+val intData: Int? = bundle?.getDataOrNull() // Crash   String-->int
+
+===> reified方式
+// Function
+private inline fun <reified T> Bundle.getDataOrNull(): T? {
+    return getSerializable(DATA_KEY) as? T
+} 
+// Caller
+val bundle: Bundle? = Bundle()
+bundle?.putSerializable(DATA_KEY, "Testing")
+val strData: String? = bundle?.getDataOrNull()
+val intData: Int? = bundle?.getDataOrNull() // Null
+
+//----------------------3. 不同的返回类型函数重载
+fun Resources.dpToPx(value: Int): Float {
+    return TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        value.toFloat(), displayMetrics)
+} 
+//导致编译时出错。原因是，函数重载方式只能根据参数计数和类型不同，而不能根据返回类型。
+fun Resources.dpToPx(value: Int): Int {
+    val floatValue: Float = dpToPx(value)
+    return floatValue.toInt()
+}
+
+===> reified方式
+inline fun <reified T> Resources.dpToPx(value: Int): T {
+    val result = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP,
+        value.toFloat(), displayMetrics)
+
+    return when (T::class) {
+        Float::class -> result as T
+        Int::class -> result.toInt() as T
+        else -> throw IllegalStateException("Type not supported")
+    }
+}
+
+// Caller
+val intValue: Int = resource.dpToPx(64)
+val floatValue: Float = resource.dpToPx(64)
+
+```
+
+
+
 
 
 ### 示例对比

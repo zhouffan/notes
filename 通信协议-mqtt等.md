@@ -1,3 +1,23 @@
+[Android网络编程之--Socket编程](https://www.jianshu.com/p/fb4dfab4eec1)
+
+- 基于TCP（传输控制协议）协议的Socket编程
+
+  **面向连接、数据可靠，速度慢，有序的**
+
+- UDP编程
+
+  **不面向连接、数据不可靠、速度快、无序的**。
+
+https://www.pianshen.com/article/5776820355/
+
+
+
+
+
+
+
+
+
 **JAVA开发MQTT总结**: https://www.cnblogs.com/rain1024/p/12358023.html
 
 

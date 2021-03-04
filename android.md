@@ -689,6 +689,31 @@ implementation 'androidx.viewpager2:viewpager2:1.0.0'
 
 [深入内存优化](https://www.jianshu.com/p/a38bfaaa9fac)
 
+https://github.com/zhouffan/AndroidGuide/blob/master/android_opensource/6-LeakCanary%E6%89%A9%E5%B1%95%E9%98%85%E8%AF%BB.md
+
+**内存泄露的本质是长周期对象持有了短周期对象的引用，导致短周期对象该被回收的时候无法被回收，从而导致内存泄露。**
+
+**如果该对象由于代码错误或者其它原因导致迟迟无法被系统回收，此时就是发生了内存泄露。**
+
+#### 1、Broadcast Receivers
+
+如果在 Activity 中注册了 BroadcastReceiver 而忘记了 **unregister** 的话，BroadcastReceiver 就将一直持有对 Activity 的引用，即使 Activity 已经执行了 `onDestroy`
+
+#### 2、Static Activity or View Reference
+
+看下面的示例代码，将 TextView 声明为了静态变量（无论出于什么原因）。不管是直接还是间接通过静态变量引用了 Activity 或者 View，在 Activity 被销毁后都无法对其进行垃圾回收
+
+**永远不要通过静态变量来引用 Activity、View 和 Context**
+
+#### 3、Singleton Class Reference
+
+看下面的例子，定义了一个 Singleton 类，该类需要传递 Context 以便从本地存储中获取一些文件
+
+此时如果没有主动将 SingletonSampleClass 包含的 context 置空的话，就将导致内存泄露。那如何解决这个问题？
+
+- 可以传递 ApplicationContext，而不是将 ActivityContext 传递给 singleton 类
+- 如果真的必须使用 ActivityContext，那么当 Activity 被销毁的时候，需要确保传递将 singleton 类的 Context 设置为 null
+
 
 
 
