@@ -200,6 +200,73 @@ Internet Media Type即互联网媒体类型，也叫做MIME类型，使用两部
 
 
 
+#### 4.1 线程-死锁
+
+```java
+import java.util.Date;
+ 
+public class LockTest {
+   public static String obj1 = "obj1";
+   public static String obj2 = "obj2";
+   public static void main(String[] args) {
+      LockA la = new LockA();
+      new Thread(la).start();
+      LockB lb = new LockB();
+      new Thread(lb).start();
+   }
+}
+class LockA implements Runnable{
+   public void run() {
+      try {
+         System.out.println(new Date().toString() + " LockA 开始执行");
+         while(true){
+            synchronized (LockTest.obj1) {
+               System.out.println(new Date().toString() + " LockA 锁住 obj1");
+               Thread.sleep(3000); // 此处等待是给B能锁住机会
+               synchronized (LockTest.obj2) {
+                  System.out.println(new Date().toString() + " LockA 锁住 obj2");
+                  Thread.sleep(60 * 1000); // 为测试，占用了就不放
+               }
+            }
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+}
+class LockB implements Runnable{
+   public void run() {
+      try {
+         System.out.println(new Date().toString() + " LockB 开始执行");
+         while(true){
+            synchronized (LockTest.obj2) {
+               System.out.println(new Date().toString() + " LockB 锁住 obj2");
+               Thread.sleep(3000); // 此处等待是给A能锁住机会
+               synchronized (LockTest.obj1) {
+                  System.out.println(new Date().toString() + " LockB 锁住 obj1");
+                  Thread.sleep(60 * 1000); // 为测试，占用了就不放
+               }
+            }
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+}
+
+//结果======>  都不能进入到第二个 synchronized中去，因为第二个锁对象 被两个线程的第一个锁对象给持有了，没有释放锁
+Tue May 05 10:51:06 CST 2015 LockB 开始执行
+Tue May 05 10:51:06 CST 2015 LockA 开始执行
+Tue May 05 10:51:06 CST 2015 LockB 锁住 obj2
+Tue May 05 10:51:06 CST 2015 LockA 锁住 obj1
+```
+
+https://github.com/gdutxiaoxu/Android_interview/blob/master/Android%E5%9F%BA%E7%A1%80/Android%E9%9D%A2%E8%AF%95%E5%BF%85%E5%A4%87-%E7%BA%BF%E7%A8%8B.md
+
+
+
+
+
 
 
 ### 5、自定义注解
