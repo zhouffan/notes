@@ -669,6 +669,24 @@ https://segmentfault.com/a/1190000016079558
 
 
 
+```java
+DisplayMetrics{density=3.0, width=1080, height=2259, scaledDensity=3.0, xdpi=391.885, ydpi=391.026, densityDpi=480, noncompatWidthPixels=1080, noncompatHeightPixels=2259, noncompatDensity=3.0, noncompatDensityDpi=480, noncompatXdpi=391.885, noncompatYdpi=391.026} //华为手机
+DisplayMetrics{density=1.5, width=1920, height=1080, scaledDensity=1.5, xdpi=159.895, ydpi=160.421}   //天邑盒子
+DisplayMetrics{density=1.0, width=1280, height=720, scaledDensity=1.0, xdpi=160.157, ydpi=160.421}    //悦ME盒子
+DisplayMetrics{density=1.5, width=1920, height=1080, scaledDensity=1.5, xdpi=240.0, ydpi=240.0}       //中兴盒子
+int width = metric.widthPixels;  // 屏幕宽度（像素）
+int height = metric.heightPixels;  // 屏幕高度（像素）
+float density = metric.density;  // 屏幕密度（0.75 / 1.0 / 1.5）
+int densityDpi = metric.densityDpi;  // 屏幕密度DPI（120 / 160 / 240）
+		
+//xml布局
+android:layout_width="1908px"  ==>等效于  (1920px 换算成 1280dp)
+android:layout_width="1272dp" 
+
+//设置的是 px
+view.setLayoutParams(new LinearLayout.LayoutParams(1910, 200));  
+```
+
 
 
 ### 13、MVC/MVP/MVVM
