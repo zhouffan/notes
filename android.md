@@ -197,7 +197,9 @@ retrofit = Retrofit.Builder()
 
 
 
-### [4. glide官方](https://muyangmin.github.io/glide-docs-cn/#glide-v4-android-english-tip)
+### 4. glide 图片加载
+
+#### 4.1  [glide官方](https://muyangmin.github.io/glide-docs-cn/#glide-v4-android-english-tip)
 
 - 当 [`Glide.with()`](https://muyangmin.github.io/glide-docs-cn/javadocs/400/com/bumptech/glide/Glide.html#with-android.app.Fragment-) 中传入的 Activity 或 Fragment 实例销毁时，Glide 会自动取消加载并回收资源。
 
@@ -239,6 +241,38 @@ Glide.with(fragment)
     }
   });
 ```
+
+#### 4.2 glide预加载  有问题？
+
+https://blog.csdn.net/Ever69/article/details/104237329
+
+```java 
+ Glide.with(this).load(mUrl).diskCacheStrategy(DiskCacheStrategy.DATA).listener(object : RequestListener<Drawable> {
+            override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Drawable>?, isFirstResource: Boolean): Boolean {
+                Log.d("kkk", "预加载失败")
+                return true
+            }
+ 
+            override fun onResourceReady(resource: Drawable?, model: Any?, target: Target<Drawable>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+                Log.d("kkk", "预加载完成")
+                return true
+            }
+        }).preload()
+```
+
+**diskCacheStrategy(DiskCacheStrategy.DATA)**
+
+**preload()**
+
+/*默认的策略是DiskCacheStrategy.AUTOMATIC 
+DiskCacheStrategy有五个常量：
+DiskCacheStrategy.**ALL** 使用DATA和RESOURCE缓存远程数据，仅使用RESOURCE来缓存本地数据。
+DiskCacheStrategy.**NONE** 不使用磁盘缓存
+DiskCacheStrategy.**DATA** 在资源**解码前**就将原始数据写入磁盘缓存
+DiskCacheStrategy.**RESOURCE** 在资源**解码后**将数据写入磁盘缓存，即经过缩放等转换后的图片资源。
+DiskCacheStrategy.**AUTOMATIC** 根据**原始图片**数据和资源编码策略来自动选择**磁盘缓存策略**。*/
+
+
 
 
 
