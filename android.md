@@ -913,11 +913,101 @@ https://blog.csdn.net/u012398902/article/details/52735980
 
 
 
-#### 17.4 异常
+#### 17.5 异常
 
 [OutOfMemoryError 可以被 try catch 吗？](https://juejin.cn/post/6874916707543187463)
 
 ![img](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/bd1a8299be0041f086449e1f105842b1~tplv-k3u1fbpfcp-zoom-1.image)
+
+
+
+#### 17.6 view 监听事件
+
+**setOnDragListener**
+
+https://www.jianshu.com/p/37e72684412f -   Android之View拖拽效果
+
+```java
+bt_1.setOnLongClickListener(new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            //设置震动反馈
+            bt_1.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+
+            // 创建DragShadowBuilder，我把控件本身传进去
+            View.DragShadowBuilder builder = new View.DragShadowBuilder(bt_1);
+            // 剪切板数据，可以在DragEvent.ACTION_DROP方法的时候获取。
+            ClipData data = ClipData.newPlainText("Label", "我是文本内容！");
+            // 开始拖拽
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                bt_1.startDragAndDrop(data, builder,bt_1, 0);
+            }else{
+                bt_1.startDrag(data, builder, bt_1, 0);
+            }
+            return true;
+        }
+    });
+
+
+//
+ll_demo.setOnDragListener(new View.OnDragListener() {
+        @Override
+        public boolean onDrag(View v, DragEvent event) {
+
+            //获取事件
+            int action = event.getAction();
+            switch (action) {
+                case DragEvent.ACTION_DRAG_STARTED:
+                    Log.d("aaa", "开始拖拽");
+                    break;
+                case DragEvent.ACTION_DRAG_ENDED:
+                    Log.d("aaa", "结束拖拽");
+                    break;
+                case DragEvent.ACTION_DRAG_ENTERED:
+                    Log.d("aaa", "拖拽的view进入监听的view时");
+                    break;
+                case DragEvent.ACTION_DRAG_EXITED:
+                    Log.d("aaa", "拖拽的view离开监听的view时");
+                    ll_demo.setBackgroundColor(Color.parseColor("#303F9F"));
+                    break;
+                case DragEvent.ACTION_DRAG_LOCATION:
+                    float x = event.getX();
+                    float y = event.getY();
+                    ll_demo.setBackgroundColor(Color.GRAY);
+                    Log.i("aaa", "拖拽的view在监听view中的位置:x =" + x + ",y=" + y);
+                    break;
+                case DragEvent.ACTION_DROP:
+                    Log.i("aaa", "释放拖拽的view");
+
+                    if(event != null && event.getLocalState() != null){
+                        View localState = (View) event.getLocalState();
+                        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        ((ViewGroup) localState.getParent()).removeView(localState);
+                        ll_demo.addView(localState, layoutParams);
+                    }
+                    break;
+            }
+            return true;
+        }
+    });
+```
+
+
+
+
+
+**setOnHoverListener** - 悬停事件
+
+View类现在支持“悬停”事件，通过对指针设备（如鼠标或其他设备驱动屏幕上的光标）支持，使得其用户交互更加丰富。
+
+ 悬停事件可以是下列操作之一：
+ACTION_HOVER_ENTER
+ACTION_HOVER_EXIT
+ACTION_HOVER_MOVE
+
+如果你在View.OnHoverListener中 onHover()处理了此事件，则应该返回真。 如果返回false，则悬停事件将被继续分派到它的父视图中。
+
+可以通过android:state_hovered 和state_hovered属性状态列表提供不同的背景绘制来响应悬停事件。
 
 
 
