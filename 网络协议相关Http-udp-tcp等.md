@@ -531,3 +531,11 @@ HTTPS 可以防止用户在不知情的情况下通信链路被监听，对于�
 
 使用这样的极端方式，虽然使用了HTTPS，实现了客户端和服务器端的通信内容得到了加密，嗅探程序无法得到传输的内容，但引生出来一种弊端,无法抵挡“中间人攻击”。例如，在内网配置一个DNS，把目标服务器域名解析到本地的一个地址，然后在这个地址上使用一个中间服务器作为代理，它使用一个假的证书与客户端通讯，然后再由这个代理服务器作为客户端连接到实际的服务器，用真的证书与服务器通讯。这样所有的通讯内容都会经过这个代理，而客户端不会感知，这是由于客户端不校验服务器公钥证书导致的，如charles抓包。
 
+
+
+
+
+### 8 BIO/NIO/AIO-高性能通讯框架——Netty
+
+https://www.toutiao.com/i6930944968446362123/?tt_from=weixin&utm_campaign=client_share&wxshare_count=1&timestamp=1616980986&app=news_article&utm_source=weixin&utm_medium=toutiao_android&use_new_style=1&req_id=202103290923050102122031664021A45D&share_token=83ee361a-f41c-468e-96e6-eb87b79a5771&group_id=6930944968446362123
+
