@@ -791,7 +791,131 @@ coroutineScope.launch(Dispatchers.Main) {
 
 
 
+#### 5.1 创建协程
 
+https://developer.android.com/kotlin/coroutines/coroutines-adv
+
+导入包：
+
+```groovy
+//协程  java环境/android环境
+implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
+implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2-native-mt"
+```
+
+- **GlobalScope.launch{}** 创建一个顶级协程   //**不阻塞**当前线程   --不用
+
+- **runBlocking{}**        创建一个协程作用域  //**阻塞**当前线程    --不用
+
+- **CoroutineScope(Dispatchers.Main).launch{xxx}** 创建协程   -**-推荐**
+
+  ```kotlin
+  //在 Android 中，某些 KTX 库为某些生命周期类提供自己的 CoroutineScope。例如，ViewModel 有 viewModelScope，Lifecycle 有 lifecycleScope
+  //viewModelScope 是预定义的 CoroutineScope，包含在 ViewModel KTX 扩展中
+  val coroutineScope = CoroutineScope(Dispatchers.Main)
+  coroutineScope.launch{ 
+      val apiService = RetrofitUtil.getApiService(API::class.java)
+      val banner = apiService.getBanner().data() 
+  }
+  coroutineScope.cancel()
+  
+  //viewModelScope创建主协程，loginRepository.makeLoginRequest内创建IO 子协程
+  class LoginViewModel: ViewModel() { 
+      fun login(username: String, token: String) { 
+          // Create a new coroutine on the UI thread
+          viewModelScope.launch { 
+              // Make the network call and suspend execution until it finishes
+              val result = loginRepository.get() 
+              // Display result of the network request to the user
+              when (result) {
+                  is Result.Success<LoginResponse> -> // Happy path
+                  else -> // Show error in UI
+              }
+          }
+      } 
+  }
+  suspend fun get(url: String) = withContext(Dispatchers.IO) { /* ... */ }
+  ```
+
+- **launch{}** 在协程**作用域内**创建一个子协程
+
+- **coroutineScope{}** 在协程**作用域内**创建一个子协程作用域       //**阻塞**当前协程
+
+  ```kotlin
+  suspend fun fetchTwoDocs() =
+  		//此外，coroutineScope 会捕获协程抛出的所有异常，并将其传送回调用方
+      coroutineScope {
+          val deferredOne = async { fetchDoc(1) }
+          val deferredTwo = async { fetchDoc(2) }
+          deferredOne.await()
+          deferredTwo.await()
+      }
+  ```
+
+- **async{}.await()** 代码块中的代码会立刻执行，当调用await()时，**阻塞**当前协程，直到获取结果
+
+  ```java
+  /**
+   * 需求：两个接口都请求完毕的时 显示出结果
+   * async函数必须在协程作用域中调用，会创建一个新的 子协程 ，并返回一个Deferred对象，
+   * 调用这个对象的await方法 就可以获取执行结果
+   */
+  val message3 = async { getMessageFromNetwork1() }
+  val message4 = async { getMessageFromNetwork1() }
+  val m3 = message3.await()
+  val m4 = message4.await()
+  ```
+
+- **withContext(Dispatchers.Default){}** 代码块会立即执行，同时**阻塞**协程，直到获取结果
+
+  ```kotlin
+  suspend fun fetchDocs() {                             // Dispatchers.Main
+      val result = get("https://developer.android.com") // Dispatchers.IO for `get`
+      show(result)                                      // Dispatchers.Main
+  }
+  suspend fun get(url: String) = withContext(Dispatchers.IO) { /* ... */ }
+  ```
+
+- **suspendCoroutine{continuation -> }** 必须在挂起函数或协程作用域中才可调用，将当前协程挂起，然后在普通线程中执行lambda表达式中的代码，再调用resume() 或 resumeWithException(e)让**协程恢复**
+
+
+
+**重要提示**：使用 `suspend` 不会让 Kotlin 在后台线程上运行函数。`suspend` 函数在主线程上运行是一种正常的现象。在主线程上启动协程的情况也很常见。当您需要确保主线程安全时（例如，从磁盘上读取数据或向磁盘中写入数据、执行网络操作或运行占用大量 CPU 资源的操作时），应始终在 `suspend` 函数内使用 `withContext()`。
+
+**警告**：`launch` 和 `async` 处理异常的方式不同。由于 `async` 希望在某一时刻对 `await` 进行最终调用，因此它持有异常并将其作为 `await` 调用的一部分重新抛出。这意味着，如果您使用 `await` 从常规函数启动新协程，则能以静默方式丢弃异常。这些丢弃的异常不会出现在崩溃指标中，也不会在 logcat 中注明。
+
+
+
+#### 5.2 三种调度程序，指定应在何处运行协程
+
+- **Dispatchers.Main** - 使用此调度程序可在 Android 主线程上运行协程。此调度程序只能用于与界面交互和执行快速工作。示例包括调用 `suspend` 函数，运行 Android 界面框架操作，以及更新 [`LiveData`](https://developer.android.com/topic/libraries/architecture/livedata) 对象。
+
+- **Dispatchers.IO** - 此调度程序经过了专门优化，适合在主线程之外执行磁盘或网络 I/O。示例包括使用 [Room 组件](https://developer.android.com/topic/libraries/architecture/room)、从文件中读取数据或向文件中写入数据，以及运行任何网络操作。
+
+- **Dispatchers.Default** - 此调度程序经过了专门优化，适合在主线程之外执行占用大量 CPU 资源的工作。用例示例包括对列表排序和解析 JSON。
+
+  
+
+#### 5.3 子线程真的不能更新 UI?
+
+```java
+/** 
+ * ==>在onCreate中启动一个线程，在线程中能更新UI，为什么？（线程中延时 或者 在点击触发，则会抛出异常）
+ * ==>答疑：异常是从 ViewRootImpl#checkThread() 方法中抛出。 在 onCreate 完成时，ViewRootImpl 还没创建。
+ * Activity 并没有完成初始化 view tree
+ */
+```
+
+#### 5.4 ANR （Application Not Responding）
+
+**为什么会产生ANR？**
+
+在Android里, App的响应能力是由Activity Manager和Window Manager系统服务来监控的. 通常在如下两种情况下会弹出ANR对话框:
+
+- **InputDispatching Timeout**：5s内无法响应用户输入事件(例如键盘输入, 触摸屏幕等).
+- **BroadcastQueue Timeout** ：在执行前台广播（BroadcastReceiver）的`onReceive()`函数时10秒没有处理完成，后台为60秒。
+- **Service Timeout** ：前台服务20秒内，后台服务在200秒内没有执行完毕。
+- **ContentProvider Timeout** ：ContentProvider的publish在10s内没进行完。
 
 
 
