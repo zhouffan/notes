@@ -584,6 +584,10 @@ Only the original thread that created a view hierarchy can touch its views.
 
 ### 10、recycleView从0到1
 
+让你彻底掌握RecyclerView的缓存机制 :   https://www.jianshu.com/p/3e9aa4bdaefd
+
+
+
 
 
 https://mp.weixin.qq.com/s/auphzaQF6_wJx6dGFY6niA : RecyclerView 有五虎上将

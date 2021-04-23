@@ -96,3 +96,54 @@ HEAD~2：进行了2次commit，想都撤回。
 
 
 
+###  5、git 配置文件  （git clone慢 - 解决方案）
+
+https://blog.csdn.net/qq_29811421/article/details/109348754
+
+1.查看Git所有配置
+
+```
+git config --list
+
+git config --list --local        //只对某个仓库有效
+git config --list --global       //对当前用户的所有仓库有效
+git config --list --system       //对系统所有登录用户有效
+```
+
+2.删除全局配置项
+
+(1)终端执行命令：
+
+```
+git config --global --unset user.name
+
+git config --global user.name "your_name"
+git config --global user.email "your_email@domain.com"
+```
+
+(2)编辑配置文件：
+
+```
+git config --global --edit
+```
+
+
+
+```java
+//–glboal: 选项指的是修改 Git 的全局配置文件 ~/.gitconfig，而非各个 Git 仓库里的配置文件 .git/config。
+//protocol 指的是代理的协议，如 http，https，socks5 等。port 则为端口号。
+对指定域名生效：git config –-global http.url.proxy protocol://127.0.0.1:port 
+//url 为你需要走代理的仓库域名，url 以 http:// 和 https:// 打头的均用这个方法。
+对所有域名生效：git config –-global http.proxy protocol://127.0.0.1:port
+
+
+git config --global http.proxy http://127.0.0.1:7890
+git config --global http.proxy socks5://127.0.0.1:7890
+//为了避免从国内仓库或私有仓库clone时也走代理，配置只让github.com走代理
+//clash 既支持HTTP/HTTPS，也支持socks v5协议代理
+git config --global http.https://github.com.proxy http://127.0.0.1:7890
+git config --global http.https://github.com.proxy socks5://127.0.0.1:7890
+```
+
+**注意：Git 不认 https.proxy ，设置 http.proxy 就可以支持 https 了。**
+
