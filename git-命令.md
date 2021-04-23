@@ -1,12 +1,11 @@
-### 初始化
+### 0、 初始化
 
-#### Git global setup
-
+```java
+//**Git global setup**
 - git config --global user.name "xxx"
 - git config --global user.email "[xxxx@androidmov.com](mailto:xxxx@androidmov.com)"
 
-#### Create a new repository
-
+//**Create a new repository**
 - git clone http://192.168.2.230/amt-gitlab/iptv-dev-tp/epg-fx/message/ad/advert_hb.git
 - cd advert_hb
 - touch README.md
@@ -14,8 +13,7 @@
 - git commit -m "add README"
 - git push -u origin master
 
-#### Push an existing folder
-
+//Push an existing folder
 - cd existing_folder
 - git init
 - git remote add origin http://192.168.2.230/amt-gitlab/iptv-dev-tp/epg-fx/message/ad/advert_hb.git
@@ -23,13 +21,13 @@
 - git commit -m "Initial commit"
 - git push -u origin master
 
-#### Push an existing Git repository
-
+//**Push an existing Git repository**
 - cd existing_repo
 - git remote rename origin old-origin
 - git remote add origin http://192.168.2.230/amt-gitlab/iptv-dev-tp/epg-fx/message/ad/advert_hb.git
 - git push -u origin --all
 - git push -u origin --tags
+```
 
 
 
@@ -56,7 +54,7 @@
 
 
 
-### 2.[Git 之 merge 与 rebase 的区别](https://www.cnblogs.com/zhangzhang-y/p/13682281.html)
+### 2、 [Git 之 merge 与 rebase 的区别](https://www.cnblogs.com/zhangzhang-y/p/13682281.html)
 
 实际操作体会
 
@@ -147,3 +145,23 @@ git config --global http.https://github.com.proxy socks5://127.0.0.1:7890
 
 **注意：Git 不认 https.proxy ，设置 http.proxy 就可以支持 https 了。**
 
+
+
+### 6、常用基础命令
+
+#### 6.1 修改远程仓库地址  
+
+**方法一**：
+
+```java
+//1.修改命令
+git remote origin set-url [url]
+
+//2.先删后加
+git remote rm origin
+git remote add origin [url]
+```
+
+**方法二**： 
+
+直接修改config文件
