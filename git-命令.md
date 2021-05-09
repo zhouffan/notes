@@ -60,17 +60,19 @@
 
 
 
-### 3、git撤销add操作
+### 3、git撤销add操作 
 
-如果已经执行了git add dir_name
+- **当前**git add后取消：`git reset HEAD <路径/文件名>` 
 
-此时需要撤销 add操作，则需执行如下命令
+- 删除**之前**所有的添加： **git rm -r dir_name --cached**
 
-**git rm -r dir_name --cached**
+  由于目录已经添加到git 暂存（stage）中了，所以需要加--cached参数
 
-由于目录已经添加到git 暂存（stage）中了，所以需要加--cached参数
+- 恢复修改前数据（和远程一致：慎用）
 
+  `git checkout -- xxxxx`
 
+  `git restore src/*`
 
 ### 4、git 撤销commit
 
