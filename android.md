@@ -1255,7 +1255,21 @@ CollapsingToolbarLayout是工具栏的包装器,它通常作为AppBarLayout的�
 
 
 
+#### 18.1 navigation  （思想：全局只有一个activity）
 
+nav_graph.xml      <navigation>     xml中可以去选择 动画/fragment
+
+UI拖动 NavHostFragment， 使用  nav_graph.xml
+
+跳转：  依次入栈，出栈
+
+返回： popBackStack()
+
+
+
+deepLink（打开app跳转）
+
+html （href=“http://aaa.com/frag2/zdf/11”）===> nav_graph.xml中对应的fragment配置<deepLink app:uri:"http://aaa.com/frag2/{name}/{age}"/>
 
 
 
