@@ -701,6 +701,16 @@ https://mp.weixin.qq.com/s/h2i_17ChO9JsJvxq8tXwlA
 
 ![Jetpack MVVM 架构](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4fdef6223d184a1284479669b059f241~tplv-k3u1fbpfcp-watermark.image)
 
+
+
+
+
+
+
+
+
+
+
 ### 14、ViewPager2
 
 与ViewPager相比，包括但不限于下列几点：
